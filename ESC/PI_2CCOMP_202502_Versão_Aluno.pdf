@@ -1,0 +1,356 @@
+Projeto Curso Turma
+Projeto Interdisciplinar – 2o Semestre, 2025
+Ciência da Computação
+Desenvolvimento Web Full
+Stack
+Tema Título
+Desenvolvimento de um Web Site Desenvolvimento de uma aplicação web para o Projeto Lideranças
+Empáticas, organização voltada a causas sociais e
+desenvolvimento humano.
+Aplicação Web – Projeto Lideranças Empáticas
+Projeto Interdisciplinar – 2CCOMP – 2º SEMESTRE 2025
+1. Apresentação do Projeto
+O Lideranças Empáticas é uma iniciativa que une impacto social e educação empreendedora.
+Por meio da arrecadação de alimentos e recursos financeiros, alunos de graduação dos cursos
+de Administração, Economia e Contabilidade desenvolvem ações práticas que aplicam
+conceitos de gestão, liderança e organização.
+A proposta deste projeto interdisciplinar é desenvolver uma aplicação web responsiva que
+permita aos professores, mentores e alunos acompanharem e gerenciarem as atividades
+realizadas pelas equipes participantes. A plataforma será utilizada em edições semestrais e
+deverá contemplar o fluxo completo: desde o cadastro das equipes e atividades até a geração
+de relatórios de desempenho.
+2. Objetivos
+Objetivo Geral:
+Desenvolver uma aplicação web completa que permita o gerenciamento das edições do
+projeto Lideranças Empáticas, com controle de equipes, atividades, metas e resultados,
+apoiando a coordenação e promovendo transparência no acompanhamento das ações.
+Objetivos Específicos:
+• Aplicar os conhecimentos de desenvolvimento web full stack utilizando arquitetura
+cliente-servidor.
+• Modelar corretamente um banco de dados relacional para suportar as funcionalidades
+do sistema.
+• Entender a dinâmica organizacional do projeto e propor soluções compatíveis com o
+ambiente de gestão.
+• Incorporar princípios de design responsivo e boas práticas de desenvolvimento.
+• Produzir um sistema funcional com autenticação, persistência de dados e geração de
+relatórios.
+
+
+--- PAGE 1 ---
+
+3. Requisitos Funcionais
+• Cadastro e gerenciamento das edições do projeto (Administrador)
+• Cadastro de participantes (alunos, professores e mentores), com auto cadastro para
+alunos
+• Criação de equipes com múltiplos alunos e um mentor (Administrador)
+• Cadastro de tipos de atividade (ex: arrecadação de alimentos, fundos etc.)
+• Registro de atividades por equipe com os seguintes campos: Tipo da atividade, Nome
+da atividade, Data de início e fim, Meta esperada, Unidade da meta, Valor arrecadado,
+Valor de fundo utilizado
+• Geração de relatórios: Geral de atividades, Por período, Por equipe e por período
+4. Requisitos Não Funcionais
+Desempenho
+O sistema deve processar e exibir qualquer relatório em até 2 segundos com até 500
+registros.
+Segurança
+Autenticação obrigatória para todas as funções, com controle de acesso baseado em
+perfil.
+Usabilidade
+Interface intuitiva e responsiva, adaptando-se a celulares e computadores.
+Manutenibilidade
+Código deve seguir padrões de organização e ser devidamente comentado.
+Compatibilidade
+Suporte aos principais navegadores modernos (Chrome, Firefox, Edge).
+Persistência
+Todos os dados devem ser salvos em banco de dados relacional com integridade
+garantida por chaves primárias e estrangeiras.
+Escalabilidade
+A arquitetura deve permitir a inclusão de novas funcionalidades sem refatorações
+extensas.
+5. Tecnologias Sugeridas
+• Front-End: HTML5, CSS3, JavaScript, Bootstrap
+• Back-End: C# ou Node.js (express)
+• Banco de Dados: MySQL ou SQLite
+
+
+--- PAGE 2 ---
+
+6. Etapas do Projeto
+• 1–2: Análise de requisitos, levantamento de regras e definição de escopo
+• 3–4: Modelagem do banco de dados relacional
+• 5–6: Criação de wireframes e protótipos de interface
+• 7–8: Implementação do backend (cadastro, autenticação, API REST)
+• 9–10: Desenvolvimento do frontend (telas, formulários, integração com API)
+• 11–12: Implementação dos relatórios e testes
+• 13: Refino, correções, testes de usabilidade
+• 14: Documentação técnica e manual do usuário
+• 15: Apresentação final
+8. Possíveis Extensões da Solução
+• Exportação de relatórios em PDF
+• Dashboard com gráficos de desempenho
+• Integração com APIs externas de pagamento ou doações
+• Área de comunicação entre mentor e equipe (chat interno)
+• Notificações por e-mail ou SMS
+Obs: Cada equipe pode propor e implementar suas próprias extensões.
+
+
+--- PAGE 3 ---
+
+ENTREGÁVEIS
+Data das entregas 22/Sep 10/nov 17/11 - 25/11
+Apresentação (3,0
+Disciplinas
+Entrega 1 (3,0 Pontos) Entrega 2 (4,0 Pontos) Pontos)
+Requisitos: Implemente ao menos 2 tabelas
+no banco de dados do projeto, com as
+Requisitos: Modele o banco de dados do projeto,
+seguintes características:
+criando um diagrama que represente as tabelas,
+Defina os campos adequados para cada
+relações, chaves primárias e estrangeiras, e qualquer
+tabela.
+outra estrutura necessária para o funcionamento
+Estabeleça chaves primárias e, se
+adequado do sistema.
+necessário, chaves estrangeiras para
+A modelagem deve abranger todas as entidades
+garantir relacionamentos entre as tabelas.
+relevantes para o projeto e suas interações.
+As tabelas devem refletir as entidades e
+Formato de Entrega: Insira o diagrama de
+dados essenciais para o projeto.
+modelagem do banco de dados ou uma descrição Formato de entrega:
+Formato de Entrega: Insira a descrição das
+detalhada das tabelas e relacionamentos no arquivo Banner e Pitch de 4
+tabelas implementadas (estrutura e campos) minutos.
+Projetos em Banco de Dados README localizado na pasta BD.
+no arquivo README localizado na pasta
+No README principal do projeto, adicione um link
+BD. Critérios: Criatividade,
+que direcione para o arquivo README da pasta BD,
+No README principal do projeto, adicione Impacto Social,Tempo de
+facilitando o acesso à modelagem do banco de
+um link que direcione para o arquivo apresentação e
+dados.
+README da pasta BD. Embasamento.
+Organização: Verifique se o diagrama ou a
+Organização: Certifique-se de que a
+descrição está clara e bem estruturada, com as
+descrição das tabelas esteja bem
+tabelas e relacionamentos bem definidos.
+estruturada e clara, com os campos e tipos
+Assegure-se de que o link no README principal
+de dados especificados de forma precisa.
+esteja funcionando corretamente e direciona para o
+Verifique se o link no README principal
+arquivo na pasta BD.
+está funcionando corretamente e direciona
+para o arquivo README da pasta BD.
+Desenvolvimento Web Full
+ANEXO 1 ANEXO 2
+Stack
+
+
+--- PAGE 4 ---
+
+Mapa de Processos - Diagrama /
+Apresentação da Missão, Visão e Valores / Proposta Fluxograma de um Processo-chave
+de Valor da Empresa Descrição: Os alunos devem modelar um
+Descrição: Devem revisar ou definir a missão, visão e processo da empresa, escolhendo uma
+valores da empresa. Devem demonstrar como esses operação central e representando-a em um
+elementos impactam diretamente na gestão da fluxograma. Conteúdo mínimo obrigatório:
+empresa e no site. Além disso, devem incluir a Escolha e justificativa do processo
+proposta de valor, explicando qual problema a modelado. Diagrama do fluxo do processo
+Gestão Empresarial e
+empresa resolve para seus clientes e como se com início, etapas e fim. Identificação de
+Dinâminas das Organizações
+diferencia da concorrência. Formato de Entrega: possíveis gargalos e melhorias. Formato de
+Documento em PDF (até 3 páginas). Fonte padrão Entrega: Arquivo em PDF contendo o
+Arial, tamanho 12, espaçamento 1.5. Critérios de diagrama e a explicação textual (máximo de
+Avaliação: Clareza e coerência na definição de 2 páginas). Critérios de Avaliação: Correta
+missão, visão e valores. Relação entre esses representação do processo com começo,
+conceitos e a gestão da empresa/site. Qualidade da meio e fim. Clareza e coerência no
+proposta de valor e diferenciação do negócio. mapeamento das etapas. Identificação de
+possíveis melhorias.
+Cálculo de Máximos e Mínimos Aplicado
+ao Website
+Aplicação do Polinômio de Taylor na Modelagem Objetivo:
+de Variáveis Relacionadas ao Website Os alunos devem utilizar derivadas para
+calcular os pontos de máximo e mínimo de
+Objetivo: uma função polinomial relacionada ao
+Os alunos devem escolher uma variável relevante ao funcionamento do website que estão
+tema do website que estão desenvolvendo, definir desenvolvendo.
+uma função 𝑓(𝑥) que modele esse comportamento e
+utilizar o Polinômio de Taylor de ordem 3 para obter Conteúdo esperado:
+Cálculo II
+uma aproximação matemática dessa função.
+Definição da Função Relacionada ao
+O objetivo é demonstrar como a Série de Taylor pode Website
+ser usada para previsões, simplificações
+computacionais ou otimizações no contexto do site. Escolha de um fenômeno no site que possa
+ser modelado matematicamente. Exemplos:
+Conteúdo esperado: -Taxa de visitas ao longo do tempo
+Escolha de uma Variável Relevante ao Website (modelando o crescimento de acessos).
+Cada aluno deve definir uma variável relacionada ao -Engajamento do usuário (como a interação
+funcionamento do seu site e criar uma função 𝑓 (𝑥) varia ao longo do dia).
+que descreva esse comportamento. -Tempo de carregamento do site em
+
+
+--- PAGE 5 ---
+
+diferentes condições.
+Construa a função polinomial baseada na
+variável escolhida e represente
+gráficamente.
+Preenchimento e Entrega da
+Documentação do Projeto de Extensão: A
+Prototipação Navegável no Figma: A prototipação documentação do projeto é uma parte
+navegável é uma etapa crucial no processo de essencial para garantir que todas as
+desenvolvimento de um projeto, pois permite testar a informações relacionadas ao
+interação e o fluxo entre as telas antes de iniciar a desenvolvimento, objetivos, cronograma, e
+codificação. Usar ferramentas como o Figma para resultados estejam devidamente registradas
+Projeto Interdisciplinar: criar protótipos ajuda a visualizar a experiência do e organizadas. Ela também ajuda na
+Programação Web usuário, validar ideias e fazer ajustes baseados em avaliação do projeto e garante a
+feedbacks reais. compreensão de todas as partes envolvidas,
+A seguir, apresento uma estrutura geral de como como orientadores, alunos, e stakeholders.
+você pode organizar e criar um protótipo navegável Para o seu Projeto de Extensão, a
+no Figma para o seu projeto de gestão de usuários documentação deve ser clara, objetiva, e
+com autenticação e CRUD. bem estruturada. A seguir, apresento um
+modelo de como organizar e preencher essa
+documentação para a entrega final.
+Tecnologias que utilizam: React.Js, Node.Js e
+Detalhes do projeto:
+JavaScript
+
+
+--- PAGE 6 ---
+
+ANEXO 1
+1ª Entrega do Projeto Interdisciplinar (PI)
+Nome da Entrega: Estrutura Inicial do Projeto Web Full Stack
+Objetivo da Entrega:
+Entregar a primeira versão funcional do projeto web, contendo:
+● Frontend estático e reativo com HTML, CSS, JavaScript e React
+● Backend funcional com Node.js, Express e MySQL
+● Integração parcial entre frontend e backend
+● Estrutura organizada e modularizada, com navegação e interatividade
+Conteúdos contemplados (Aulas 1 a 8):
+● Configuração do ambiente (VS Code, extensões)
+● HTML5 semântico e responsivo
+● CSS com Flexbox e Grid
+● JavaScript com manipulação do DOM
+● Introdução ao React (JSX, componentes, props, estado)
+● Criação de formulários controlados
+● Criação de API com Express
+● Operações de CRUD básicas com MySQL
+Requisitos Técnicos
+Frontend:
+1. Projeto React funcional com ao menos 3 componentes (ex: Header, Home, Card).
+2. Layout responsivo com CSS Flexbox ou Grid.
+3. Página inicial navegável e formulário funcional (ex: cadastro de item).
+4. Manipulação de eventos e uso de useState.
+5. Estilização consistente e sem redundâncias.
+
+
+--- PAGE 7 ---
+
+Backend:
+1. Estrutura Node.js com Express, organizada em rotas e controladores.
+2. Banco de dados MySQL com ao menos uma tabela (ex: notícias, produtos, usuários).
+3. Implementação das operações Create, Read, Update e Delete.
+4. Uso de Postman para testes locais das rotas.
+Integração (mínima e parcial):
+1. O frontend deve listar ou enviar dados para o backend (ex: cadastrar e exibir notícias).
+2. Uso de fetch() ou axios no React para conectar à API criada.
+Ferramentas Recomendadas:
+● Visual Studio Code
+● React + Vite
+● Node.js + Express
+● MySQL + Workbench
+● Postman
+● Netlify
+● Firebase, Railway, Vercel
+Deploy obrigatório
+● Frontend: Netlify ou Vercel
+● Backend: Railway, Render, ou similar
+● Alunos devem apresentar os dois links públicos funcionando
+● Repositório Git com código-fonte deve conter README estruturado, incluindo:
+○ Descrição do projeto
+○ Rotas da API
+○ Como rodar o projeto localmente
+○ Vídeo demonstrativo
+
+
+--- PAGE 8 ---
+
+Observações:
+● Cada grupo deve apresentar o projeto funcionando, acessível por links públicos.
+● O código deve estar organizado, legível e modularizado.
+● O professor poderá solicitar acesso ao código-fonte e à API via navegador ou Postman.
+● O professor poderá fazer perguntas técnicas para verificar domínio do conteúdo.
+● A versão final do projeto será complementada na segunda entrega (PI2), com recursos como
+autenticação, upload de imagens e deploy.
+
+
+--- PAGE 9 ---
+
+ANEXO 2
+2ª Entrega do Projeto Interdisciplinar (PI)
+Nome da Entrega: Projeto Web Full Stack Finalizado com Funcionalidades Avançadas e Deploy
+Objetivo da Entrega
+Entregar a versão final do projeto integrador Full Stack com todas as funcionalidades implementadas,
+integrando frontend com React e backend com Node.js + MySQL, com upload de imagens, autenticação
+com JWT, rotas protegidas, estilização aprimorada, e deploy completo das duas camadas da aplicação.
+Conteúdos contemplados (Aulas 10 a 16):
+● Upload de imagens com Multer
+● Autenticação com Bcrypt e JWT
+● Integração real Frontend ↔ Backend com fetch/axios
+● React Router DOM e navegação entre rotas
+● Estilização com CSS avançado e acessibilidade básica
+● Testes de funcionalidades e validações
+● Deploy completo do sistema
+Requisitos Técnicos
+Frontend (React):
+● SPA completa com navegação via React Router DOM
+● Componentes reutilizáveis com props e useState
+● Consumo de API com fetch ou axios, incluindo rotas autenticadas
+● Armazenamento e uso do token JWT
+● Layout responsivo com Flexbox/Grid e transições visuais
+● Mensagens de erro e loading.
+● Formulários controlados com validações básicas
+● Deploy no Netlify ou Vercel
+Backend (Node.js + Express + MySQL):
+
+
+--- PAGE 10 ---
+
+● API REST completa com rotas protegidas por middleware JWT
+● Upload de imagens com Multer (armazenamento local ou remoto)
+● Criptografia de senhas com Bcrypt
+● Conexão com banco de dados relacional
+● Organização modular: rotas, controladores, middlewares, models
+● Respostas estruturadas com status HTTP apropriados
+● Variáveis de ambiente separadas
+● Deploy no Render, Railway ou outro serviço compatível
+Integração obrigatória:
+● Frontend deve consumir a API hospedada
+● Funcionalidades de login e acesso autenticado
+● CRUD completo e funcional
+● Envio de imagens via formulário
+Deploy obrigatório
+● Frontend: Netlify ou Vercel
+● Backend: Railway, Render, ou similar
+● Alunos devem apresentar os dois links públicos funcionando
+● Repositório Git com código-fonte deve conter README estruturado, incluindo:
+○ Descrição do projeto
+○ Rotas da API
+○ Como rodar o projeto localmente
+○ Vídeo demonstrativo
+Dicas e Recomendações
+● Teste o projeto completo antes da apresentação.
+● Deixe o código limpo, sem console.log ou arquivos não utilizados.
+● O professor poderá testar o sistema ao vivo e solicitar explicações sobre trechos do código.
+
+
+--- PAGE 11 ---
+
