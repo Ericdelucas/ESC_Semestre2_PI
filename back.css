@@ -692,25 +692,3 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #5a6fd8;
 }
-
-.branca {
-    color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    margin: 20px 0;
-}
-.welcome-video {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-}
-footer {
-    background: #11922d;
-    color: white;
-    text-align: center;
-    padding: 1rem 0;
-    position: relative;
-    bottom: 0;
-    width: 1500px;
-    margin-top: 10px;
-}
