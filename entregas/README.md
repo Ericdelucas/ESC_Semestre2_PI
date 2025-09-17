@@ -11,6 +11,7 @@
 ## Professores Orientadores: <a href="https://www.linkedin.com/">Cristina Machado Correa Leite</a>, <a href="https://www.linkedin.com/">Francisco de Souza Escobar</a>, <a href="https://www.linkedin.com/in/j%C3%A9sus-gomes-83b769108/">Jesus De Lisboa Gomes</a>, <a href="https://www.linkedin.com/in/dolemes/">David De Oliveira Lemes</a>, <a href="https://www.linkedin.com/">Katia Milani Lara Bossi</a>
 
 ## Descrição
+É importante destacar que um projeto de extensão não precisa ser necessariamente igual a um projeto de pesquisa. Mesmo que haja necessidade de pesquisa prévia para a fundamentação teórica, construção da introdução e para um melhor entendimento sobre a realidade a ser trabalhada, é preciso que um projeto de extensão contemple práticas que promovam mudanças e/ou melhorias identificadas como necessárias. O projeto final deverá ser simples, objetivo, claro e ter de 3 a 5 páginas, dentro do modelo aqui proposto.
 
 <p align="center">
 <img src="https://pix4free.org/assets/library/2021-01-20/originals/game.jpg" alt="NOME DO JOGO" border="0">
@@ -102,7 +103,7 @@ Utilize o link <https://chooser-beta.creativecommons.org/> para fazer uma licen�
 
 Aqui estão as referências usadas no projeto.
 
-1. <https://github.com/iuricode/readme-template>
+1. <https://liderancasempaticas.com/>
 2. <https://github.com/gabrieldejesus/readme-model>
 3. <https://chooser-beta.creativecommons.org/>
 4. <https://freesound.org/>
