@@ -6,7 +6,7 @@
 
 # ESC
 
-## Integrantes: <a href="https://www.linkedin.com/in/eric-de-lucas-silva/">Eric de Lucas Silva</a>, <a href="https://www.linkedin.com/in/stephanie-silva-1b6100340/">Stephanie Macedo da Silva</a>, <a href="https://www.linkedin.com/in/chenn-tube-53b550381/">EnHsiang Chien</a>, <a href="https://www.linkedin.com/">Joel Ademir Laura.</a>
+## Integrantes: <a href="https://www.linkedin.com/in/eric-de-lucas-silva/">Eric de Lucas Silva</a>, <a href="https://www.linkedin.com/in/stephanie-silva-1b6100340/">Stephanie Macedo da Silva</a>, <a href="https://www.linkedin.com/in/chenn-tube-53b550381/">EnHsiang Chien</a>, <a href="https://www.linkedin.com/in/joel-copa-378304359/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app">Joel Ademir Laura.</a>
 
 ## Professores Orientadores: <a href="https://www.linkedin.com/in/cristina-machado-corr%C3%AAa-leite-630309160/">Cristina Machado Correa Leite</a>, <a href="https://www.linkedin.com/in/francisco-escobar/">Francisco de Souza Escobar</a>, <a href="https://www.linkedin.com/in/j%C3%A9sus-gomes-83b769108/">Jesus De Lisboa Gomes</a>, <a href="https://www.linkedin.com/in/dolemes/">David De Oliveira Lemes</a>, <a href="https://www.linkedin.com/in/katia-bossi/">Katia Milani Lara Bossi</a>
 
