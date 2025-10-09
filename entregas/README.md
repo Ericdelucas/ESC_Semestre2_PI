@@ -12,18 +12,23 @@
 
 ## Descrição
 É importante destacar que um projeto de extensão não precisa ser necessariamente igual a um projeto de pesquisa. Mesmo que haja necessidade de pesquisa prévia para a fundamentação teórica, construção da introdução e para um melhor entendimento sobre a realidade a ser trabalhada, é preciso que um projeto de extensão contemple práticas que promovam mudanças e/ou melhorias identificadas como necessárias. O projeto final deverá ser simples, objetivo, claro e ter de 3 a 5 páginas, dentro do modelo aqui proposto.
+<br>
 
 <p align="center">
-<img src="https://cdn.discordapp.com/attachments/1414327290367840256/1417940236251431082/image.png?ex=68ce4980&is=68ccf800&hm=704a03d6216287085f8d8ef8d60b3225424930edfcf9b958823bca87c230b846" alt="NOME DO JOGO" border="0">
+  <img 
+    src="https://github.com/Tetefanii/Testando/blob/main/Captura%20de%20tela%202025-10-09%20192532.png?raw=true" 
+    alt="Lideranças Empáticas" 
+    border="0">
+  <br>
+  Lideranças Empáticas
 </p>
 
+<p>
+Nosso projeto é uma plataforma desenvolvida para apoiar o projetos institucionais da FECAP, com foco na formação de líderes empáticos e comprometidos com o impacto social. O sistema foi criado para facilitar o gerenciamento das campanhas de arrecadação realizadas pelos alunos, permitindo o controle de equipes, projetos e resultados de forma prática e organizada. Seu principal objetivo é digitalizar o acompanhamento das ações do projeto, tornando-as mais eficientes e seguros.
 
-De um a dois parágrafos sobre o que é seu projeto e o que ele faz.
-<br><br>
-Meu projeto ajuda estudantes FECAP a configurarem seus githubs.
-<br><br>
-May the force be with you!
-<br><br>
+Por meio da plataforma, os usuários podem cadastrar alunos, equipes e campanhas, além de registrar e acompanhar doações de alimentos e valores arrecadados. O sistema também possibilita que mentores acompanhem o desempenho dos grupos e emitam relatórios sobre o progresso das atividades. Dessa forma, promove uma gestão mais justa e integrada das campanhas, incentivando a colaboração, a responsabilidade social e o desenvolvimento de habilidades de liderança entre os participantes.
+</p>
+<br>
 
 ## 🛠 Estrutura de pastas
 
@@ -56,7 +61,7 @@ Há também 4 pastas que seguem da seguinte forma:
 
 <b>src</b>: Pasta que contém o código fonte.
 
-## 🛠 Instalação
+<!-- ## 🛠 Instalação
 
 <b>Android:</b>
 
@@ -96,7 +101,7 @@ Coloque código do prompt de comnando se for necessário
 ```
 
 ## 📋 Licença/License
-Utilize o link <https://chooser-beta.creativecommons.org/> para fazer uma licença CC BY 4.0.
+Utilize o link <https://chooser-beta.creativecommons.org/> para fazer uma licença CC BY 4.0. -->
 
 ## 🎓 Referências
 
@@ -104,7 +109,6 @@ Aqui estão as referências usadas no projeto.
 
 1. <https://liderancasempaticas.com/>
 2. <https://github.com/gabrieldejesus/readme-model>
-3. <https://chooser-beta.creativecommons.org/>
-4. <https://freesound.org/>
-5. <https://www.toptal.com/developers/gitignore>
-6. Músicas por: <a href="https://freesound.org/people/DaveJf/sounds/616544/"> DaveJf </a> e <a href="https://freesound.org/people/DRFX/sounds/338986/"> DRFX </a> ambas com Licença CC 0.
+3. <https://www.figma.com/>
+4. <https://www.toptal.com/developers/gitignore>
+5. <https://www.youtube.com/>
