@@ -1,0 +1,45 @@
+{
+  "name": "liderancas-empaticas-backend",
+  "version": "1.0.0",
+  "description": "Backend para o Sistema Lideranças Empáticas - Projeto Interdisciplinar",
+  "main": "server.js",
+  "type": "module",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "echo 'No build step required for Node.js'",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "health": "curl http://localhost:3001/api/health || echo 'Health check failed'"
+  },
+  "keywords": [
+    "express",
+    "mysql",
+    "crud",
+    "api",
+    "liderancas-empaticas",
+    "nodejs",
+    "railway"
+  ],
+  "author": "Equipe Lideranças Empáticas",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+<<<<<<< HEAD
+    "install": "^0.13.0",
+    "jsonwebtoken": "^9.0.2",
+=======
+>>>>>>> 6f11fcfe011e4096a611249f0a94ad34be0f2866
+    "multer": "^2.0.2",
+    "mysql2": "^3.6.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
