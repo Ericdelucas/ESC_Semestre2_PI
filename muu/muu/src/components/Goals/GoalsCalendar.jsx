@@ -283,7 +283,7 @@ function GoalsCalendar({ userType = 'aluno', equipeUsuario = 'Equipe Alpha', met
 
       {/* Modal de Meta */}
       {showModal && (
-        <div className="modal-overlay">
+        <div className={`modal-overlay ${showModal ? 'show' : ''}`}>
           <div className="modal goals-modal">
             <div className="modal-header">
               <h3>{metaSelecionada ? 'Editar Meta' : 'Nova Meta'}</h3>
