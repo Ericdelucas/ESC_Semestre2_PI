@@ -1,15 +1,15 @@
-
-
-
-
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import mysql from 'mysql2/promise'
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 import imagesRoutes from './src/routes/images.js';
 app.use('/api', imagesRoutes);
+
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
@@ -118,9 +118,11 @@ async function initializeDatabase() {
     )`);
 
     console.log('Tabelas do banco de dados inicializadas.');
-  } catch (error) {
-    console.error('Erro ao inicializar tabelas:', error.message);
+  } 
+  catch (error) {
+    console.error('Erro ao inicializar tabelas:', error);
   }
+  
 }
 
 // Função para executar queries
@@ -129,7 +131,7 @@ async function executeQuery(query, params = []) {
     const [rows] = await db.execute(query, params);
     return rows;
   } catch (error) {
-    console.error('Erro ao executar query:', error.message);
+    console.error('Erro ao executar query:', error);
     throw error;
   }
 }

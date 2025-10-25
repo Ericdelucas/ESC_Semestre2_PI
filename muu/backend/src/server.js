@@ -3,10 +3,21 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const uploadDir = path.join(__dirname, 'uploads');
+
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.locals.executeQuery = executeQuery;
+
+import edicoesRoutes from './src/routes/edicoes.js';
+app.use('/api/edicoes', edicoesRoutes);
+
+
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }

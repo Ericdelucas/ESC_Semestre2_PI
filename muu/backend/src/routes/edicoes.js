@@ -20,26 +20,30 @@ router.get('/', async (req, res) => {
 });
 
 // GET - Buscar edição por ID
-router.get('/:id', async (req, res) => {
+router.get('/', async (req, res) => {
+  console.log('🟡 [ROTA] /api/edicoes foi chamada'); // <-- LOG 1
+
   try {
+    console.log('🟡 executeQuery existe?', req.app.locals.executeQuery); // <-- LOG 2
+
     const executeQuery = req.app.locals.executeQuery;
-    const sql = 'SELECT * FROM edicoes WHERE id = ?';
-    const params = [req.params.id];
-    
-    const rows = await executeQuery(sql, params);
-    
-    if (rows.length > 0) {
-      res.json({
-        message: 'Edição encontrada',
-        data: rows[0]
-      });
-    } else {
-      res.status(404).json({ error: 'Edição não encontrada' });
-    }
+    const sql = 'SELECT * FROM edicoes ORDER BY created_at DESC';
+    console.log('🟡 Rodando SQL:', sql); // <-- LOG 3
+
+    const rows = await executeQuery(sql);
+    console.log('🟢 Resultado do banco:', rows); // <-- LOG 4
+
+    res.json({
+      message: 'Edições listadas com sucesso',
+      data: rows
+    });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.log('🔴 ERRO DETECTADO NA ROTA: ', error); // <-- LOG 5
+    res.status(500).json({ error: error.message || 'Erro desconhecido' });
   }
 });
+
 
 // POST - Criar nova edição
 router.post('/', async (req, res) => {
