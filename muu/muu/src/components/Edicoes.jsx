@@ -210,8 +210,8 @@ function Edicoes({ active, edicoes, onEdicoesChange }) {
 
         {/* Modal de Edição/Criação */}
         {showModal && (
-          <div className="modal-overlay">
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="edicoes-modal-overlay">
+            <div className="edicoes-modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <h3>{editingEdicao ? 'Editar Edição' : 'Nova Edição'}</h3>
                 <button className="modal-close" onClick={resetForm}>
