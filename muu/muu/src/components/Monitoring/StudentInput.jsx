@@ -1,15 +1,16 @@
 import { useState } from 'react'
 
-function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes = [] }) {
+function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes = [], edicoes = [] }) {
   const [formData, setFormData] = useState({
     dataDoacao: new Date().toISOString().split('T')[0],
-    alunoResponsavel: '',
-    itemDoacao: '',
-    campanha: '',
-    doador: '',
-    quantidade: '',
-    pontuacao: 0
-  })
+	    alunoResponsavel: '',
+	    itemDoacao: '',
+	    campanha: '',
+	    doador: '',
+	    quantidade: '',
+	    pontuacao: 0,
+	    edicao: '' // Novo campo para Edição
+	  })
 
   const [showModal, setShowModal] = useState(false)
 
@@ -101,9 +102,19 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
     <div className="student-input-container">
       <div className="input-header">
         <h3>
-          <i className="fas fa-hand-holding-heart"></i>
-          Registro de Doações
-        </h3>
+	          <i className="fas fa-hand-holding-heart"></i>
+	          Registro de Doações
+	        </h3>
+	        {/* Exibe o botão "+Nova Doação" apenas se o modal não estiver aberto */}
+	        {!showModal && (
+	          <button 
+	            className="btn btn-primary"
+	            onClick={() => setShowModal(true)}
+	          >
+	            <i className="fas fa-plus"></i>
+	            Nova Doação
+	          </button>
+	        )}
         <button 
           className="btn btn-primary"
           onClick={() => setShowModal(true)}
@@ -160,15 +171,15 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
       {showModal && (
         <div className="modal-overlay">
           <div className="modal donation-modal">
-            <div className="modal-header">
-              <h3>Registrar Nova Doação</h3>
-              <button 
-                className="modal-close"
-                onClick={() => setShowModal(false)}
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
+	            <div className="modal-header">
+	              <h3>Registrar Nova Doação</h3>
+	              <button 
+	                className="modal-close"
+	                onClick={() => setShowModal(false)}
+	              >
+	                &times;
+	              </button>
+	            </div>
 
             <form onSubmit={handleSubmit} className="donation-form">
               <div className="form-row">
@@ -197,9 +208,28 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
                     <option value="Pedro Azevedo Bastos">Pedro Azevedo Bastos</option>
                     <option value="Maria Silva">Maria Silva</option>
                     <option value="João Santos">João Santos</option>
-                  </select>
-                </div>
-              </div>
+	                  </select>
+	                </div>
+	              </div>
+	
+	              <div className="form-row">
+	                <div className="form-group">
+	                  <label>Edição Relacionada *</label>
+	                  <select
+	                    name="edicao"
+	                    value={formData.edicao}
+	                    onChange={handleInputChange}
+	                    required
+	                  >
+	                    <option value="">Selecione a Edição</option>
+	                    {edicoes.map(edicao => (
+	                      <option key={edicao.id} value={edicao.nome}>
+	                        {edicao.nome}
+	                      </option>
+	                    ))}
+	                  </select>
+	                </div>
+	              </div>
 
               <div className="form-row">
                 <div className="form-group">
@@ -298,4 +328,3 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
 }
 
 export default StudentInput
-

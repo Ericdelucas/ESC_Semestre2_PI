@@ -10,6 +10,7 @@ body {
     line-height: 1.6;
     color: #333;
     background-image: url('/src/assets/background.png');
+    background-size: cover;
 }
 
 .container {
@@ -20,38 +21,43 @@ body {
 
 /* HEADER */
 .header {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d5f3f 100%);
+    background: linear-gradient(90deg, #0d1f1a 0%, #1b5e20 100%);
     color: white;
     padding: 1rem 0;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     position: sticky;
     top: 0;
     z-index: 1000;
     width: 100%;
-}
-  
+    overflow: visible; /* garante que nada seja cortado */
+  }
 .header .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: nowrap;
-    padding: 0 2rem;
-    max-width: 1300px;
-    margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 0 2rem;
+  min-height: 70px; /* altura mínima fixa */
+}.header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 0 2rem;
+  min-height: 70px; /* altura mínima fixa */
 }
   
  
 .logo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-    white-space: nowrap;
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  white-space: nowrap;
 }
   
 .logo i {
+    margin-right: 0.5rem;
     color: #1abc9c;
     font-size: 1.8rem;
 }
@@ -64,16 +70,15 @@ body {
 }
 
 .nav ul {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    list-style: none;
-    gap: 1.2rem;
-    margin: 0;
-    padding: 0;
-    overflow-x: auto; 
-    scrollbar-width: none; 
-  }
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  list-style: none;
+  gap: 1.2rem;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
   
 .nav a {
     color: white;
@@ -98,13 +103,11 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
-    flex-shrink: 0;
 }
   
 .user-info {
     color: #e0e0e0;
     font-size: 0.9rem;
-    white-space: nowrap;
 }
   
 /* Botões */
