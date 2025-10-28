@@ -4,7 +4,7 @@ function Header({ user, onLogin, onLogout, onNavigate, currentSection }) {
       <div className="container">
         <div className="logo">
           <i className="fas fa-heart"></i>
-          <span>Lideranças Empáticas</span>
+          <span>Lideranças</span><span>Empáticas</span>
         </div>
         
         <nav className="nav">
@@ -98,12 +98,12 @@ function Header({ user, onLogin, onLogout, onNavigate, currentSection }) {
               <span className="user-info">
                 Olá, {user.nome} ({user.tipo})
               </span>
-              <button className="btn btn-outline" onClick={onLogout}>
+              <button className="btn btn-primary" onClick={onLogout}>
                 Sair
               </button>
             </>
           ) : (
-            <button className="btn btn-outline" onClick={onLogin}>
+            <button className="btn btn-primary" onClick={onLogin}>
               Login
             </button>
           )}
