@@ -1,7 +1,7 @@
 function Header({ user, onLogin, onLogout, onNavigate, currentSection }) {
   return (
     <header className="header">
-      <div className="container">
+      <div className="container_header">
         <div className="logo">
           <i className="fas fa-heart"></i>
           <span>Lideranças</span><span>Empáticas</span>

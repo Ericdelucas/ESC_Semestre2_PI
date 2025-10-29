@@ -3,7 +3,7 @@ import videoFile from '../assets/video.mp4'
 function Welcome({ active, onLogin }) {
   return (
     <section className={`section ${active ? 'active' : ''}`}>
-      <div className="container_body">
+      <div className="container">
         <div className="welcome-content">
           <h1>Bem-vindo ao Sistema Lideranças Empáticas</h1>
           <p>Uma plataforma para gerenciar projetos de impacto social e desenvolvimento humano.</p>

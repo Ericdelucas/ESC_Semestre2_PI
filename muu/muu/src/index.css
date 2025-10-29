@@ -16,38 +16,54 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 20px 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-size: cover;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden; 
+}
+
+
+
+/* HEADER */
+.container_header{
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 0 20px;
 }
 
-/* HEADER */
 .header {
     background: linear-gradient(90deg, #0d1f1a 0%, #1b5e20 100%);
     color: white;
-    padding: 1rem 0;
+    padding: 0.5rem 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     position: sticky;
     top: 0;
     z-index: 1000;
     width: 100%;
-    overflow: visible; /* garante que nada seja cortado */
-  }
-.header .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  padding: 0 2rem;
-  min-height: 70px; /* altura mínima fixa */
-}.header .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  padding: 0 2rem;
-  min-height: 70px; /* altura mínima fixa */
+    padding-top: 1.2rem;
+    padding-bottom: 1rem;
+    overflow: visible;
 }
+
+.container_header {
+    max-width: 1250px; /* um pouco mais largo */
+    margin: 0 auto;
+    padding: 0 2rem; /* mais espaçamento nas laterais */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+    overflow: visible; /* importante: evita cortar o botão */
+}
+
   
- 
 .logo {
   display: flex;
   align-items: center;
@@ -66,49 +82,78 @@ body {
     flex: 1;
     display: flex;
     justify-content: center;
-    overflow: hidden; 
+    align-items: center;
+    overflow: visible;
+}
+
+.nav li {
+    flex: 0 0 auto;
 }
 
 .nav ul {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  list-style: none;
-  gap: 1.2rem;
-  margin: 0;
-  padding: 0;
-  overflow: visible;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* ✅ Centraliza horizontalmente todas as linhas */
+    align-content: center;   /* ✅ Centraliza verticalmente as linhas */
+    gap: 1rem;
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    max-width: 90%; /* opcional, ajuda a não encostar nas laterais */
 }
   
 .nav a {
     color: white;
     text-decoration: none;
-    padding: 0.5rem 0.8rem;
-    border-radius: 5px;
+    padding: 0.6rem 1rem; /* 🔥 mais altura interna */
+    border-radius: 25px;
+    background: transparent;
     transition: all 0.3s ease;
-    cursor: pointer;
     font-size: 0.95rem;
-    font-weight: 500;
-    white-space: nowrap;
+    font-weight: 600;
+    line-height: 1; /* 🔥 centraliza o texto verticalmente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
   
 .nav a:hover,
 .nav a.active {
-    background-color: #1abc9c;
-    color: white;
+  background-color: #1abc9c;
+  color: white;
 }
   
-
 .user-actions {
     display: flex;
     align-items: center;
     gap: 1rem;
+    margin-left: auto;
+    flex-shrink: 0;
+    padding-right: 1rem; /* adiciona respiro à direita */
+}
+
+.user-actions .btn {
+    background-color: #1abc9c;
+    border: none;
+    color: white;
+    padding: 0.6rem 1.4rem; /* 🔥 aumentei o tamanho do botão */
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem; /* 🔥 texto um pouco maior */
+    transition: all 0.3s ease;
+}
+
+.user-actions .btn:hover {
+    background-color: #17a589;
+    transform: scale(1.05); /* 🔥 efeito suave ao passar o mouse */
 }
   
 .user-info {
     color: #e0e0e0;
     font-size: 0.9rem;
 }
+
   
 /* Botões */
 .btn {
@@ -121,6 +166,7 @@ body {
     display: inline-block;
     transition: all 0.3s ease;
     font-weight: 500;
+    
 }
 
 .btn-primary {
@@ -143,6 +189,7 @@ body {
     background: #1abc9c;
     color: white;
     border-color: #1abc9c;
+    
 }
 
 .btn-large {
@@ -157,6 +204,7 @@ body {
 
 .btn-danger:hover {
     background-color: #c0392b;
+    
 }
 
 .btn-success {
