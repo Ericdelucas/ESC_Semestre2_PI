@@ -2,10 +2,38 @@ import { useState } from 'react'
 import StudentInput from './Monitoring/StudentInput'
 
 function Doacoes({ active, participantes, equipes, doacoes = [], onDoacoesChange, userType, edicoes }) {
+  const [showModal, setShowModal] = useState(false)
+  const [novaDoacao, setNovaDoacao] = useState({
+    data_doacao: '',
+    aluno_responsavel: '',
+    item_doacao: '',
+    quantidade: '',
+    campanha: '',
+    doador: '',
+    pontuacao: 0
+  })
   const handleAddDonation = (novaDonacao) => {
     const novasDoacoes = [novaDonacao, ...doacoes]
     if (onDoacoesChange) {
       onDoacoesChange(novasDoacoes)
+    }
+  }
+  const handleSalvarDoacao = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/doacoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(novaDoacao)
+      })
+      if (!response.ok) throw new Error('Erro ao registrar doação')
+
+      const data = await response.json()
+      handleAddDonation(data.data)
+      setShowModal(false)
+      alert('✅ Doação registrada com sucesso!')
+    } catch (error) {
+      console.error(error)
+      alert('❌ Erro ao registrar a doação.')
     }
   }
 
@@ -147,6 +175,7 @@ function Doacoes({ active, participantes, equipes, doacoes = [], onDoacoesChange
             </div>
           </>
         )}
+        
 
         {/* Componente de Input de Doações */}
         <StudentInput 
