@@ -4,9 +4,11 @@ function Header({ user, onLogin, onLogout, onNavigate, currentSection }) {
       <div className="container_header">
         <div className="logo">
           <i className="fas fa-heart"></i>
-          <span>Lideranças</span><span>Empáticas</span>
+          <span>
+            Lideranças<br />Empáticas
+          </span>
         </div>
-        
+
         <nav className="nav">
           <ul id="navMenu">
             <li>
@@ -113,5 +115,4 @@ function Header({ user, onLogin, onLogout, onNavigate, currentSection }) {
   )
 }
 
-export default Header
-
+export default Header;
