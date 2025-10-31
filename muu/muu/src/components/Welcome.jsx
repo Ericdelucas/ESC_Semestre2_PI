@@ -35,7 +35,7 @@ function Welcome({ active, onLogin }) {
           </footer>
           
           <p className="branca">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Velit iure ipsam officiis ullam consequuntur sapiente doloremque saepe, consectetur quasi nesciunt laborum! Eveniet, mollitia. Quas deserunt architecto facilis! Nisi, voluptate alias?
+          O projeto Lideranças Empáticas tem como objetivo elevar o aprendizado dos estudantes do 1° semestre dos cursos de ciências econômicas, ciências contábeis e administração da Fundação Escola de Comércio Álvares Penteado - FECAP
           </p>
           
           <div className="welcome-video">

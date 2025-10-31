@@ -12,6 +12,24 @@ import Monitoramento from './components/Monitoramento'
 import Doacoes from './components/Doacoes'
 import Metas from './components/Metas'
 
+// Definição de permissões de acesso por tipo de usuário
+const ACCESS_MAP = {
+  administrador: [
+    'dashboard', 'edicoes', 'participantes', 'equipes', 'atividades', 
+    'relatorios', 'monitoramento', 'doacoes', 'metas'
+  ],
+  professor: [
+    'dashboard', 'participantes', 'equipes', 'atividades', 
+    'relatorios', 'monitoramento'
+  ],
+  mentor: [
+    'dashboard', 'participantes', 'equipes', 'atividades'
+  ],
+  aluno: [
+    'dashboard', 'doacoes' // Aluno pode ver o dashboard (padrão) e adicionar doações
+  ]
+}
+
 function App() {
   const [currentSection, setCurrentSection] = useState('welcome')
   const [user, setUser] = useState(null)

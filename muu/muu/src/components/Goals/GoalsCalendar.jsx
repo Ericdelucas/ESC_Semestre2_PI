@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 
+
+
 function GoalsCalendar({ userType = 'aluno', equipeUsuario = 'Equipe Alpha', metas = [], onMetasChange }) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(null)
