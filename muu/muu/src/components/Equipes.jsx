@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { equipesService } from '../services/api'
 
 function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
   const [showModal, setShowModal] = useState(false)
   const [editingEquipe, setEditingEquipe] = useState(null)
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     nome: '',
     mentorId: '',
@@ -14,43 +16,69 @@ function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
   const mentores = participantes.filter(p => p.tipo === 'mentor')
   const alunos = participantes.filter(p => p.tipo === 'aluno')
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    
-    if (editingEquipe) {
-      // Editar equipe existente
-      setEquipes(equipes.map(equipe => 
-        equipe.id === editingEquipe.id 
-          ? { ...formData, id: editingEquipe.id }
-          : equipe
-      ))
-    } else {
-      // Criar nova equipe
-      const novaEquipe = {
-        ...formData,
-        id: Date.now()
-      }
-      setEquipes([...equipes, novaEquipe])
+  useEffect(() => {
+    if (active) loadEquipes()
+  }, [active])
+
+  const loadEquipes = async () => {
+    try {
+      setLoading(true)
+      const response = await equipesService.getAll()
+      setEquipes(response.data.data || [])
+    } catch (error) {
+      console.error('Erro ao carregar equipes:', error)
+      alert('Erro ao carregar equipes. Verifique se o backend está rodando.')
+    } finally {
+      setLoading(false)
     }
-    
-    resetForm()
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      setLoading(true)
+      const payload = { ...formData, membros: formData.membrosIds.join(',') }
+      if (editingEquipe) {
+        await equipesService.update(editingEquipe.id, payload)
+      } else {
+        await equipesService.create(payload)
+      }
+      await loadEquipes()
+      resetForm()
+      alert(editingEquipe ? 'Equipe atualizada!' : 'Equipe criada!')
+    } catch (error) {
+      console.error('Erro ao salvar equipe:', error)
+      alert('Erro ao salvar equipe. Tente novamente.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleEdit = (equipe) => {
     setEditingEquipe(equipe)
     setFormData({
       nome: equipe.nome,
-      mentorId: equipe.mentorId,
-      membrosIds: equipe.membrosIds,
-      edicaoId: equipe.edicaoId,
-      descricao: equipe.descricao
+      mentorId: equipe.mentorId || '',
+      membrosIds: equipe.membros?.split(',') || [],
+      edicaoId: equipe.edicaoId || '',
+      descricao: equipe.descricao || ''
     })
     setShowModal(true)
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (confirm('Tem certeza que deseja excluir esta equipe?')) {
-      setEquipes(equipes.filter(equipe => equipe.id !== id))
+      try {
+        setLoading(true)
+        await equipesService.delete(id)
+        await loadEquipes()
+        alert('Equipe excluída com sucesso!')
+      } catch (error) {
+        console.error('Erro ao excluir equipe:', error)
+        alert('Erro ao excluir equipe. Tente novamente.')
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -61,47 +89,33 @@ function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
   }
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
   const handleMembrosChange = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value)
-    setFormData({
-      ...formData,
-      membrosIds: selectedOptions
-    })
+    const selected = Array.from(e.target.selectedOptions, opt => opt.value)
+    setFormData(prev => ({ ...prev, membrosIds: selected }))
   }
 
-  const getMentorNome = (mentorId) => {
-    const mentor = participantes.find(p => p.id === parseInt(mentorId))
-    return mentor ? mentor.nome : 'N/A'
-  }
+  const getMentorNome = (id) => participantes.find(p => p.id === parseInt(id))?.nome || 'N/A'
+  const getEdicaoNome = (id) => edicoes.find(e => e.id === parseInt(id))?.nome || 'N/A'
+  const getMembrosNomes = (ids) => ids.map(id => participantes.find(p => p.id === parseInt(id))?.nome || '').join(', ')
 
-  const getEdicaoNome = (edicaoId) => {
-    const edicao = edicoes.find(e => e.id === parseInt(edicaoId))
-    return edicao ? edicao.nome : 'N/A'
-  }
-
-  const getMembrosNomes = (membrosIds) => {
-    return membrosIds.map(id => {
-      const membro = participantes.find(p => p.id === parseInt(id))
-      return membro ? membro.nome : 'N/A'
-    }).join(', ')
-  }
+  if (!active) return null
 
   return (
-    <section className={`section ${active ? 'active' : ''}`}>
+    <section className="section active">
       <div className="container">
         <div className="section-header">
-          <h2>Gerenciar Equipes</h2>
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+          <h2>Gerenciamento de Equipes</h2>
+          <button className="btn btn-primary" onClick={() => setShowModal(true)} disabled={loading}>
             <i className="fas fa-plus"></i> Nova Equipe
           </button>
         </div>
-        
+
+        {loading && <div className="loading-message"><i className="fas fa-spinner fa-spin"></i> Carregando...</div>}
+
         <div className="table-container">
           <table className="data-table">
             <thead>
@@ -114,131 +128,78 @@ function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
               </tr>
             </thead>
             <tbody>
-              {equipes.map(equipe => (
-                <tr key={equipe.id}>
-                  <td>{equipe.nome}</td>
-                  <td>{getMentorNome(equipe.mentorId)}</td>
-                  <td>{getMembrosNomes(equipe.membrosIds)}</td>
-                  <td>{getEdicaoNome(equipe.edicaoId)}</td>
-                  <td className="actions">
-                    <button 
-                      className="btn btn-primary" 
-                      onClick={() => handleEdit(equipe)}
-                    >
-                      Editar
-                    </button>
-                    <button 
-                      className="btn btn-danger" 
-                      onClick={() => handleDelete(equipe.id)}
-                    >
-                      Excluir
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {equipes.length === 0 && (
-                <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
-                    Nenhuma equipe cadastrada
-                  </td>
-                </tr>
+              {equipes.length === 0 ? (
+                <tr><td colSpan="5" className="no-data">Nenhuma equipe cadastrada.</td></tr>
+              ) : (
+                equipes.map(equipe => (
+                  <tr key={equipe.id}>
+                    <td>{equipe.nome}</td>
+                    <td>{getMentorNome(equipe.mentorId)}</td>
+                    <td>{getMembrosNomes(equipe.membros?.split(',') || [])}</td>
+                    <td>{getEdicaoNome(equipe.edicaoId)}</td>
+                    <td>
+                      <button className="btn btn-sm btn-outline" onClick={() => handleEdit(equipe)}>Editar</button>
+                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(equipe.id)}>Excluir</button>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="modal active">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>{editingEquipe ? 'Editar Equipe' : 'Nova Equipe'}</h2>
-              <span className="close" onClick={resetForm}>&times;</span>
+        {showModal && (
+          <div className="modal active">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2>{editingEquipe ? 'Editar Equipe' : 'Nova Equipe'}</h2>
+                <span className="close" onClick={resetForm}>&times;</span>
+              </div>
+
+              <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <label>Nome da Equipe:</label>
+                  <input name="nome" value={formData.nome} onChange={handleChange} required />
+                </div>
+
+                <div className="form-group">
+                  <label>Mentor:</label>
+                  <select name="mentorId" value={formData.mentorId} onChange={handleChange} required>
+                    <option value="">Selecione um mentor...</option>
+                    {mentores.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Membros (Alunos):</label>
+                  <select multiple name="membrosIds" value={formData.membrosIds} onChange={handleMembrosChange} style={{ height: '150px' }}>
+                    {alunos.map(a => <option key={a.id} value={a.id}>{a.nome}</option>)}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Edição:</label>
+                  <select name="edicaoId" value={formData.edicaoId} onChange={handleChange} required>
+                    <option value="">Selecione...</option>
+                    {edicoes.map(e => <option key={e.id} value={e.id}>{e.nome}</option>)}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Descrição:</label>
+                  <textarea name="descricao" rows="3" value={formData.descricao} onChange={handleChange}></textarea>
+                </div>
+
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? <i className="fas fa-spinner fa-spin"></i> : 'Salvar'}
+                </button>
+              </form>
             </div>
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="nome">Nome da Equipe:</label>
-                <input 
-                  type="text" 
-                  id="nome" 
-                  name="nome" 
-                  value={formData.nome}
-                  onChange={handleChange}
-                  required 
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="mentorId">Mentor:</label>
-                <select 
-                  id="mentorId" 
-                  name="mentorId" 
-                  value={formData.mentorId}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Selecione um mentor...</option>
-                  {mentores.map(mentor => (
-                    <option key={mentor.id} value={mentor.id}>
-                      {mentor.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label htmlFor="membrosIds">Membros (Alunos):</label>
-                <select 
-                  id="membrosIds" 
-                  name="membrosIds" 
-                  multiple
-                  value={formData.membrosIds}
-                  onChange={handleMembrosChange}
-                  className="checkbox-group"
-                  style={{ height: '150px' }}
-                >
-                  {alunos.map(aluno => (
-                    <option key={aluno.id} value={aluno.id}>
-                      {aluno.nome} - {aluno.curso}
-                    </option>
-                  ))}
-                </select>
-                <small>Segure Ctrl (ou Cmd) para selecionar múltiplos alunos</small>
-              </div>
-              <div className="form-group">
-                <label htmlFor="edicaoId">Edição:</label>
-                <select 
-                  id="edicaoId" 
-                  name="edicaoId" 
-                  value={formData.edicaoId}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Selecione uma edição...</option>
-                  {edicoes.map(edicao => (
-                    <option key={edicao.id} value={edicao.id}>
-                      {edicao.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label htmlFor="descricao">Descrição:</label>
-                <textarea 
-                  id="descricao" 
-                  name="descricao" 
-                  rows="3"
-                  value={formData.descricao}
-                  onChange={handleChange}
-                />
-              </div>
-              <button type="submit" className="btn btn-primary">Salvar</button>
-            </form>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   )
 }
 
 export default Equipes
-
