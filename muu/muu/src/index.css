@@ -408,6 +408,8 @@ footer {
     color: #999;
     font-size: 0.8rem;
 }
+/* Metas */
+
 
 /* Tabelas */
 .table-container {
@@ -1401,3 +1403,305 @@ footer {
     }
 }
 
+/* * ===================== CALENDÁRIO DE METAS ===================== */ 
+
+.goals-calendar {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  margin-top: 2rem;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.calendar-navigation {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.calendar-navigation h3 {
+  font-size: 1.4rem;
+  color: #1a1a1a;
+}
+
+.nav-btn {
+  background: #1abc9c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: #16a085;
+  transform: scale(1.05);
+}
+
+/* ======= Grade do calendário ======= */
+.calendar-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-weight: 600;
+  color: #555;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.3rem;
+}
+
+.calendar-day {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 0.5rem;
+  min-height: 85px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.calendar-day:hover {
+  background: #e9f7f4;
+}
+
+.calendar-day.other-month {
+  opacity: 0.5;
+}
+
+.calendar-day.today {
+  border: 2px solid #1abc9c;
+}
+
+.calendar-day.selected {
+  background: #d1f2eb;
+  box-shadow: 0 0 0 2px #1abc9c inset;
+}
+
+.day-number {
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+  color: #1a1a1a;
+}
+
+/* Indicadores de metas */
+.day-metas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.3rem;
+  width: 100%;
+}
+
+.meta-indicator {
+  background-color: #1abc9c;
+  color: white;
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-top: 3px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.meta-indicator:hover {
+  transform: scale(1.05);
+  background-color: #16a085;
+}
+
+/* Cores por prioridade */
+.priority-high { background: #e74c3c; }
+.priority-medium { background: #f1c40f; color: #333; }
+.priority-low { background: #2ecc71; }
+
+/* Cores por status */
+.status-pending { opacity: 0.8; }
+.status-progress { border-left: 3px solid #3498db; }
+.status-completed { border-left: 3px solid #2ecc71; opacity: 0.9; }
+.status-overdue { border-left: 3px solid #e74c3c; }
+
+/* Meta extra */
+.meta-more {
+  font-size: 0.7rem;
+  color: #555;
+  margin-top: 0.2rem;
+}
+
+/* Lista de metas abaixo do calendário */
+.metas-list {
+  margin-top: 2rem;
+}
+
+.metas-list h4 {
+  margin-bottom: 1rem;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.metas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.meta-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  padding: 1rem;
+  transition: transform 0.2s;
+  border-left: 4px solid transparent;
+}
+
+.meta-card:hover {
+  transform: translateY(-3px);
+}
+
+.meta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.meta-header h5 {
+  font-size: 1.1rem;
+  color: #1a1a1a;
+}
+
+.meta-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1abc9c;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.btn-icon.delete {
+  color: #e74c3c;
+}
+
+.btn-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Detalhes */
+.meta-description {
+  color: #555;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.meta-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.meta-progress {
+  margin-top: 0.5rem;
+}
+
+.progress-bar {
+  background: #eee;
+  border-radius: 5px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: #1abc9c;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.8rem;
+  text-align: right;
+  margin-top: 0.2rem;
+  color: #555;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  position: fixed;
+  top: 100px;
+  right: -300px;
+  width: 280px;
+  height: calc(100% - 120px);
+  background: #ffffff;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
+  border-radius: 12px 0 0 12px;
+  padding: 1rem;
+  transition: right 0.4s ease;
+  z-index: 1500;
+}
+
+.sidebar.open {
+  right: 0;
+}
+
+.sidebar .toggle-btn {
+  position: absolute;
+  left: -30px;
+  top: 20px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px 0 0 6px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.meta-progress {
+  margin-bottom: 1rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #eee;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress.safe { background: #4caf50; }
+.progress.warning { background: #ff9800; }
+.progress.danger { background: #f44336; }

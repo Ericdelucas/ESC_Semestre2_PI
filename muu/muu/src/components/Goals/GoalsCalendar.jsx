@@ -1,64 +1,56 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from "react"
 
-
-
-function GoalsCalendar({ userType = 'aluno', equipeUsuario = 'Equipe Alpha', metas = [], onMetasChange }) {
+function GoalsCalendar({ metas = [], onMetasChange, equipeUsuario = "Equipe Alpha" }) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(null)
   const [showModal, setShowModal] = useState(false)
-  const [metaSelecionada, setMetaSelecionada] = useState(null)
+  const [editingMeta, setEditingMeta] = useState(null)
+  const [showSidebar, setShowSidebar] = useState(true)
+
   const [formData, setFormData] = useState({
-    titulo: '',
-    descricao: '',
-    dataInicio: '',
-    dataFim: '',
-    prioridade: 'media',
-    status: 'pendente',
-    responsavel: '',
+    titulo: "",
+    descricao: "",
+    dataInicio: "",
+    dataFim: "",
+    prioridade: "media",
+    status: "pendente",
     equipe: equipeUsuario
   })
 
-  // Usar metas passadas como prop ao invés de dados forjados
-
+  // === Funções de Calendário ===
   const getDaysInMonth = (date) => {
     const year = date.getFullYear()
     const month = date.getMonth()
     const firstDay = new Date(year, month, 1)
     const lastDay = new Date(year, month + 1, 0)
-    const daysInMonth = lastDay.getDate()
-    const startingDayOfWeek = firstDay.getDay()
-
     const days = []
-    
-    // Dias do mês anterior
-    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-      const prevDate = new Date(year, month, -i)
-      days.push({ date: prevDate, isCurrentMonth: false })
+
+    for (let i = 0; i < firstDay.getDay(); i++) {
+      days.push({ date: new Date(year, month, i - firstDay.getDay() + 1), isCurrentMonth: false })
     }
-    
-    // Dias do mês atual
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day)
-      days.push({ date, isCurrentMonth: true })
+
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      days.push({ date: new Date(year, month, i), isCurrentMonth: true })
     }
-    
-    // Dias do próximo mês para completar a grade
-    const remainingDays = 42 - days.length
-    for (let day = 1; day <= remainingDays; day++) {
-      const nextDate = new Date(year, month + 1, day)
+
+    while (days.length < 42) {
+      const nextDate = new Date(
+        year,
+        month,
+        lastDay.getDate() + (days.length - (firstDay.getDay() + lastDay.getDate())) + 1
+      )
       days.push({ date: nextDate, isCurrentMonth: false })
     }
-    
+
     return days
   }
 
   const getMetasForDate = (date) => {
-    const dateStr = date.toISOString().split('T')[0]
-    return metas.filter(meta => {
-      return dateStr >= meta.dataInicio && dateStr <= meta.dataFim
-    })
+    const dateStr = date.toISOString().split("T")[0]
+    return metas.filter((meta) => dateStr >= meta.dataInicio && dateStr <= meta.dataFim)
   }
 
+  // === Navegação ===
   const handlePrevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))
   }
@@ -69,106 +61,88 @@ function GoalsCalendar({ userType = 'aluno', equipeUsuario = 'Equipe Alpha', met
 
   const handleDateClick = (date) => {
     setSelectedDate(date)
-    const metasData = getMetasForDate(date)
-    if (metasData.length > 0) {
-      // Mostrar detalhes das metas do dia
-    }
   }
 
-  const handleAddMeta = () => {
-    setMetaSelecionada(null)
+  // === Modal ===
+  const openNewMetaModal = () => {
+    if (!selectedDate) {
+      alert("Selecione um dia no calendário antes de criar uma meta.")
+      return
+    }
+
+    setEditingMeta(null)
     setFormData({
-      titulo: '',
-      descricao: '',
-      dataInicio: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
-      dataFim: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
-      prioridade: 'media',
-      status: 'pendente',
-      responsavel: '',
+      titulo: "",
+      descricao: "",
+      dataInicio: selectedDate.toISOString().split("T")[0],
+      dataFim: selectedDate.toISOString().split("T")[0],
+      prioridade: "media",
+      status: "pendente",
       equipe: equipeUsuario
     })
     setShowModal(true)
   }
 
-  const handleEditMeta = (meta) => {
-    setMetaSelecionada(meta)
-    setFormData(meta)
+  const openEditMetaModal = (meta) => {
+    setEditingMeta(meta)
+    setFormData({ ...meta })
     setShowModal(true)
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    
-    if (metaSelecionada) {
-      // Editar meta existente
-      const metasAtualizadas = metas.map(meta => 
-        meta.id === metaSelecionada.id ? { ...formData, id: meta.id } : meta
+
+    if (editingMeta) {
+      const atualizadas = metas.map((m) =>
+        m.id === editingMeta.id ? { ...editingMeta, ...formData } : m
       )
-      if (onMetasChange) {
-        onMetasChange(metasAtualizadas)
-      }
+      onMetasChange && onMetasChange(atualizadas)
     } else {
-      // Adicionar nova meta
-      const novaMeta = {
-        ...formData,
-        id: Date.now(),
-        progresso: 0
-      }
-      const metasAtualizadas = [...metas, novaMeta]
-      if (onMetasChange) {
-        onMetasChange(metasAtualizadas)
-      }
+      const novaMeta = { id: Date.now(), ...formData }
+      const novas = [...metas, novaMeta]
+      onMetasChange && onMetasChange(novas)
     }
-    
+
     setShowModal(false)
-    setMetaSelecionada(null)
-    setFormData({
-      titulo: '',
-      descricao: '',
-      dataInicio: '',
-      dataFim: '',
-      prioridade: 'media',
-      status: 'pendente',
-      responsavel: '',
-      equipe: equipeUsuario
-    })
+    setEditingMeta(null)
   }
 
-  const handleDeleteMeta = (metaId) => {
-    if (confirm('Tem certeza que deseja excluir esta meta?')) {
-      const metasAtualizadas = metas.filter(meta => meta.id !== metaId)
-      if (onMetasChange) {
-        onMetasChange(metasAtualizadas)
-      }
-    }
+  const handleDelete = () => {
+    if (!editingMeta) return
+    if (!confirm("Deseja realmente excluir esta meta?")) return
+
+    const filtradas = metas.filter((m) => m.id !== editingMeta.id)
+    onMetasChange && onMetasChange(filtradas)
+    setShowModal(false)
+    setEditingMeta(null)
   }
+
+  // === Utilitários ===
+  const calcularProgressoMeta = (meta) => {
+    const inicio = new Date(meta.dataInicio)
+    const fim = new Date(meta.dataFim)
+    const hoje = new Date()
+
+    if (hoje <= inicio) return 0
+    if (hoje >= fim) return 100
+
+    const total = fim - inicio
+    const passado = hoje - inicio
+    return Math.min(100, Math.round((passado / total) * 100))
+  }
+
+  const metasAtivas = useMemo(() => {
+    const hoje = new Date()
+    return metas.filter((meta) => new Date(meta.dataFim) >= hoje)
+  }, [metas])
 
   const monthNames = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
   ]
+  const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
 
-  const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-
-  const getPrioridadeClass = (prioridade) => {
-    switch (prioridade) {
-      case 'alta': return 'priority-high'
-      case 'media': return 'priority-medium'
-      case 'baixa': return 'priority-low'
-      default: return 'priority-medium'
-    }
-  }
-
-  const getStatusClass = (status) => {
-    switch (status) {
-      case 'concluida': return 'status-completed'
-      case 'em_andamento': return 'status-progress'
-      case 'pendente': return 'status-pending'
-      case 'atrasada': return 'status-overdue'
-      default: return 'status-pending'
-    }
-  }
-
+  // === Interface ===
   return (
     <div className="goals-calendar">
       <div className="calendar-header">
@@ -176,226 +150,149 @@ function GoalsCalendar({ userType = 'aluno', equipeUsuario = 'Equipe Alpha', met
           <button onClick={handlePrevMonth} className="nav-btn">
             <i className="fas fa-chevron-left"></i>
           </button>
-          <h3>
-            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-          </h3>
+          <h3>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</h3>
           <button onClick={handleNextMonth} className="nav-btn">
             <i className="fas fa-chevron-right"></i>
           </button>
         </div>
-        
-        <div className="calendar-actions">
-          <button className="btn btn-primary" onClick={handleAddMeta}>
-            <i className="fas fa-plus"></i>
-            Nova Meta
-          </button>
-        </div>
+
+        <button className="btn btn-primary" onClick={openNewMetaModal}>
+          <i className="fas fa-plus"></i> Nova Meta
+        </button>
       </div>
 
       <div className="calendar-grid">
         <div className="calendar-weekdays">
-          {dayNames.map(day => (
+          {dayNames.map((day) => (
             <div key={day} className="weekday">{day}</div>
           ))}
         </div>
-        
+
         <div className="calendar-days">
-          {getDaysInMonth(currentDate).map((dayObj, index) => {
-            const metasData = getMetasForDate(dayObj.date)
-            const isToday = dayObj.date.toDateString() === new Date().toDateString()
+          {getDaysInMonth(currentDate).map((dayObj, i) => {
+            const metasDoDia = getMetasForDate(dayObj.date)
             const isSelected = selectedDate && dayObj.date.toDateString() === selectedDate.toDateString()
-            
+
             return (
               <div
-                key={index}
-                className={`calendar-day ${!dayObj.isCurrentMonth ? 'other-month' : ''} ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
+                key={i}
+                className={`calendar-day ${!dayObj.isCurrentMonth ? "other-month" : ""} ${isSelected ? "selected" : ""}`}
                 onClick={() => handleDateClick(dayObj.date)}
               >
                 <span className="day-number">{dayObj.date.getDate()}</span>
-                {metasData.length > 0 && (
-                  <div className="day-metas">
-                    {metasData.slice(0, 2).map(meta => (
-                      <div
-                        key={meta.id}
-                        className={`meta-indicator ${getPrioridadeClass(meta.prioridade)} ${getStatusClass(meta.status)}`}
-                        title={meta.titulo}
-                      >
-                        {meta.titulo.substring(0, 15)}...
-                      </div>
-                    ))}
-                    {metasData.length > 2 && (
-                      <div className="meta-more">+{metasData.length - 2}</div>
-                    )}
+
+                {metasDoDia.map((meta) => (
+                  <div
+                    key={meta.id}
+                    className="meta-indicator"
+                    title={meta.descricao || meta.titulo}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      openEditMetaModal(meta)
+                    }}
+                  >
+                    {meta.titulo}
                   </div>
-                )}
+                ))}
               </div>
             )
           })}
         </div>
       </div>
 
-      {/* Lista de Metas */}
-      <div className="metas-list">
-        <h4>
-          <i className="fas fa-list"></i>
-          Metas da Equipe {equipeUsuario}
-        </h4>
-        <div className="metas-grid">
-          {metas.map(meta => (
-            <div key={meta.id} className={`meta-card ${getStatusClass(meta.status)}`}>
-              <div className="meta-header">
-                <h5>{meta.titulo}</h5>
-                <div className="meta-actions">
-                  <button onClick={() => handleEditMeta(meta)} className="btn-icon">
-                    <i className="fas fa-edit"></i>
-                  </button>
-                  <button onClick={() => handleDeleteMeta(meta.id)} className="btn-icon delete">
-                    <i className="fas fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-              
-              <p className="meta-description">{meta.descricao}</p>
-              
-              <div className="meta-details">
-                <span className="meta-date">
-                  <i className="fas fa-calendar"></i>
-                  {new Date(meta.dataInicio).toLocaleDateString('pt-BR')} - {new Date(meta.dataFim).toLocaleDateString('pt-BR')}
-                </span>
-                <span className={`meta-priority ${getPrioridadeClass(meta.prioridade)}`}>
-                  {meta.prioridade.charAt(0).toUpperCase() + meta.prioridade.slice(1)}
-                </span>
-              </div>
-              
-              {meta.progresso !== undefined && (
-                <div className="meta-progress">
-                  <div className="progress-bar">
-                    <div 
-                      className="progress-fill" 
-                      style={{width: `${meta.progresso}%`}}
-                    ></div>
-                  </div>
-                  <span className="progress-text">{meta.progresso}%</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* === MODAL UNIVERSAL === */}
+      <div className={`modal ${showModal ? 'active' : ''}`}>
+        <div className="modal-content">
+          <div className="modal-header">
+            <h2>{editingMeta ? "Editar Meta" : "Nova Meta"}</h2>
+            <span className="close" onClick={() => setShowModal(false)}>&times;</span>
+          </div>
 
-      {/* Modal de Meta */}
-      {showModal && (
-        <div className={`modal-overlay ${showModal ? 'show' : ''}`}>
-          <div className="modal goals-modal">
-            <div className="modal-header">
-              <h3>{metaSelecionada ? 'Editar Meta' : 'Nova Meta'}</h3>
-              <button 
-                className="modal-close"
-                onClick={() => setShowModal(false)}
-              >
-                <i className="fas fa-times"></i>
-              </button>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Título da Meta *</label>
+              <input
+                type="text"
+                value={formData.titulo}
+                onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                required
+              />
             </div>
 
-            <form onSubmit={handleSubmit} className="goals-form">
-              <div className="form-group">
-                <label>Título da Meta *</label>
+            <div className="form-group">
+              <label>Descrição</label>
+              <textarea
+                value={formData.descricao}
+                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+              />
+            </div>
+
+            <div className="form-row" style={{ display: 'flex', gap: '1rem' }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Data de Início *</label>
                 <input
-                  type="text"
-                  value={formData.titulo}
-                  onChange={(e) => setFormData(prev => ({...prev, titulo: e.target.value}))}
+                  type="date"
+                  value={formData.dataInicio}
+                  onChange={(e) => setFormData({ ...formData, dataInicio: e.target.value })}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label>Descrição</label>
-                <textarea
-                  value={formData.descricao}
-                  onChange={(e) => setFormData(prev => ({...prev, descricao: e.target.value}))}
-                  rows="3"
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Data de Início *</label>
-                  <input
-                    type="date"
-                    value={formData.dataInicio}
-                    onChange={(e) => setFormData(prev => ({...prev, dataInicio: e.target.value}))}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Data de Fim *</label>
-                  <input
-                    type="date"
-                    value={formData.dataFim}
-                    onChange={(e) => setFormData(prev => ({...prev, dataFim: e.target.value}))}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Prioridade</label>
-                  <select
-                    value={formData.prioridade}
-                    onChange={(e) => setFormData(prev => ({...prev, prioridade: e.target.value}))}
-                  >
-                    <option value="baixa">Baixa</option>
-                    <option value="media">Média</option>
-                    <option value="alta">Alta</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Status</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData(prev => ({...prev, status: e.target.value}))}
-                  >
-                    <option value="pendente">Pendente</option>
-                    <option value="em_andamento">Em Andamento</option>
-                    <option value="concluida">Concluída</option>
-                    <option value="atrasada">Atrasada</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Responsável</label>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Data de Fim *</label>
                 <input
-                  type="text"
-                  value={formData.responsavel}
-                  onChange={(e) => setFormData(prev => ({...prev, responsavel: e.target.value}))}
-                  placeholder="Nome do responsável"
+                  type="date"
+                  value={formData.dataFim}
+                  onChange={(e) => setFormData({ ...formData, dataFim: e.target.value })}
+                  required
                 />
               </div>
+            </div>
 
-              <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancelar
+            <div className="form-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+              {editingMeta && (
+                <button type="button" className="btn btn-danger" onClick={handleDelete}>
+                  <i className="fas fa-trash"></i> Excluir
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  <i className="fas fa-save"></i>
-                  {metaSelecionada ? 'Atualizar' : 'Criar'} Meta
-                </button>
-              </div>
-            </form>
-          </div>
+              )}
+              <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>Cancelar</button>
+              <button type="submit" className="btn btn-primary">{editingMeta ? "Salvar Alterações" : "Salvar"}</button>
+            </div>
+          </form>
         </div>
-      )}
+      </div>
+
+      {/* === SIDEBAR === */}
+      <div className={`sidebar ${showSidebar ? "open" : ""}`}>
+        <button className="toggle-btn" onClick={() => setShowSidebar(!showSidebar)}>
+          <i className={`fas fa-chevron-${showSidebar ? "right" : "left"}`}></i>
+        </button>
+        <h3>⏳ Prazo das Metas</h3>
+
+        {metasAtivas.length === 0 ? (
+          <p>Nenhuma meta em andamento</p>
+        ) : (
+          metasAtivas.map((meta) => {
+            const progresso = calcularProgressoMeta(meta)
+            const diasRestantes = Math.ceil((new Date(meta.dataFim) - new Date()) / (1000 * 60 * 60 * 24))
+
+            return (
+              <div key={meta.id} className="meta-progress">
+                <strong>{meta.titulo}</strong>
+                <div className="progress-bar">
+                  <div
+                    className={`progress ${progresso > 80 ? "danger" : progresso > 50 ? "warning" : "safe"}`}
+                    style={{ width: `${progresso}%` }}
+                  ></div>
+                </div>
+                <small>{diasRestantes > 0 ? `${diasRestantes} dias restantes` : "Prazo encerrado"}</small>
+              </div>
+            )
+          })
+        )}
+      </div>
     </div>
   )
 }
 
 export default GoalsCalendar
-
