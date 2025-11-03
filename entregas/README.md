@@ -16,7 +16,7 @@
 
 <p align="center">
   <img 
-    src="https://github.com/Tetefanii/Testando/blob/main/Captura%20de%20tela%202025-10-09%20192532.png?raw=true" 
+    src="entregas/imagens/bem-vindo.png" 
     alt="Lideranças Empáticas" 
     border="0">
   <br>
@@ -47,21 +47,7 @@ Por meio da plataforma, os usuários podem cadastrar alunos, equipes e campanhas
   &emsp;|-->Frontend<br>
 |readme.md<br>
 
-A pasta raiz contem dois arquivos que devem ser alterados:
-
-<b>README.MD</b>: Arquivo que serve como guia e explicação geral sobre seu projeto. O mesmo que você está lendo agora.
-
-Há também 4 pastas que seguem da seguinte forma:
-
-<b>documentos</b>: Toda a documentação estará nesta pasta.
-
-<b>executáveis</b>: Binários e executáveis do projeto devem estar nesta pasta.
-
-<b>imagens</b>: Imagens do sistema
-
-<b>src</b>: Pasta que contém o código fonte.
-
-<!-- ## 🛠 Instalação
+## 🛠 Instalação
 
 <b>Android:</b>
 
