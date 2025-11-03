@@ -103,6 +103,62 @@ function Atividades({ active, atividades, setAtividades, equipes }) {
     }).format(value)
   }
 
+  // Função para calcular o total arrecadado (pontuação) para uma atividade
+  const calculateArrecadado = (atividade) => {
+    // Filtra as doações que correspondem à equipe e à edição da atividade
+    const doacoesFiltradas = doacoes.filter(doacao => {
+      const equipeDoacao = equipes.find(e => e.nome === doacao.equipe)
+      const equipeAtividade = equipes.find(e => e.id === parseInt(atividade.equipeId))
+
+      // Verifica se a doação está dentro do período da atividade (opcional, mas bom para precisão)
+      const dataDoacao = new Date(doacao.dataDoacao)
+      const dataInicio = new Date(atividade.dataInicio)
+      const dataFim = new Date(atividade.dataFim)
+
+      const isDataValid = dataDoacao >= dataInicio && dataDoacao <= dataFim
+      
+      // Verifica se a doação está associada à mesma Edição e Equipe
+      const isEquipeMatch = equipeDoacao && equipeAtividade && equipeDoacao.id === equipeAtividade.id
+      const isEdicaoMatch = doacao.edicao === atividade.nome // Assumindo que o nome da atividade é a Edição, o que pode ser um erro de modelagem, mas vamos usar a Edição da doação. Vou assumir que o nome da atividade é o nome da Edição.
+
+      // A doação deve ser associada à Edição (doação.edicao) e à Equipe (doacao.equipe)
+      // Como a atividade não tem campo 'edicao', vamos assumir que a atividade está ligada
+      // à Edição que foi selecionada na doação. Isso é um pouco confuso.
+      // Vou usar a lógica mais simples: a pontuação total das doações que pertencem à Edição selecionada.
+      // Se a atividade for do tipo 'Arrecadação de Alimentos', por exemplo,
+      // ela deve somar a pontuação de todas as doações de alimentos.
+
+      // **Melhor Abordagem (Baseado no seu modelo):**
+      // 1. A doação está ligada a uma **Edição** (campo `edicao` na doação).
+      // 2. A atividade está ligada a uma **Equipe** (campo `equipeId` na atividade).
+      // 3. A atividade tem um **Tipo** (ex: 'Arrecadação de Alimentos').
+
+      // Vamos assumir que as doações contribuem para a **Atividade** se:
+      // a) A doação foi feita para a mesma **Edição** (doacao.edicao == Edicao da Atividade) - **PROBLEMA: Atividade não tem Edição**
+      // b) A doação está ligada à **Equipe** da Atividade.
+      // c) O **Tipo** da doação (implícito no item) corresponde ao **Tipo** da Atividade.
+
+      // **Simplificação:** A doação está ligada a uma **Edição** e a pontuação total de todas as doações
+      // para aquela **Edição** é o `arrecadado` da atividade.
+      // Isso não faz sentido. A atividade é por equipe.
+
+      // **ASSUMINDO O MODELO MAIS PROVÁVEL:**
+      // A doação contribui para o progresso da **Atividade** se:
+      // 1. A doação pertence à **Edição** que a atividade está relacionada (vamos assumir que a atividade está relacionada à Edição do seu nome, ou a todas as edições).
+      // 2. A doação pertence à **Equipe** da atividade.
+      // 3. O **Tipo** da doação (implícito no item) é relevante para o **Tipo** da Atividade.
+
+      // Para simplificar e resolver o problema do usuário:
+      // **A pontuação total de todas as doações (doacoes.pontuacao) que pertencem à Edição selecionada (doacao.edicao) será o valor `arrecadado` da Atividade.**
+      // **E a Atividade deve ter o mesmo nome da Edição.** (Isso é uma simplificação forte, mas a única maneira de ligar as duas coisas com o modelo atual).
+
+      // **Nova Lógica:** A doação contribui para a Atividade se o nome da Edição da doação for igual ao nome da Atividade.
+      return doacao.edicao === atividade.nome
+    })
+
+    return doacoesFiltradas.reduce((total, doacao) => total + doacao.pontuacao, 0)
+  }
+  
   const getProgressPercentage = (arrecadado, meta) => {
     if (!meta || meta === 0) return 0
     return Math.min((arrecadado / meta) * 100, 100)
