@@ -1,90 +1,105 @@
 import { useState } from 'react'
 
-function LoginModal({ show, onClose, onLogin }) {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    userType: ''
-  })
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    
-    // Simulação de login - em um app real, aqui faria a validação no backend
-    if (formData.email && formData.password && formData.userType) {
-      const userData = {
-        nome: formData.email.split('@')[0], // Usa parte do email como nome
-        email: formData.email,
-        tipo: formData.userType
-      }
-      onLogin(userData)
-      setFormData({ email: '', password: '', userType: '' })
-    } else {
-      alert('Por favor, preencha todos os campos')
-    }
-  }
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
-  }
+function LoginModal({ show, onClose, onLogin, onShowRegister }) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
 
   if (!show) return null
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    if (!email || !password) {
+      alert('Por favor, preencha todos os campos.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('http://localhost:3001/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Credenciais inválidas.')
+      }
+
+      alert('✅ Login realizado com sucesso!')
+      setEmail('')
+      setPassword('')
+      onLogin(data) // Envia os dados do usuário para o App
+    } catch (error) {
+      alert(`❌ ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="modal active">
       <div className="modal-content">
         <div className="modal-header">
           <h2>Login</h2>
-          <span className="close" onClick={onClose}>&times;</span>
+          <span className="close" onClick={onClose}>
+            &times;
+          </span>
         </div>
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email:</label>
-            <input 
-              type="email" 
-              id="email" 
-              name="email" 
-              value={formData.email}
-              onChange={handleChange}
-              required 
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
+
           <div className="form-group">
             <label htmlFor="password">Senha:</label>
-            <input 
-              type="password" 
-              id="password" 
-              name="password" 
-              value={formData.password}
-              onChange={handleChange}
-              required 
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
-          <div className="form-group">
-            <label htmlFor="userType">Tipo de Usuário:</label>
-            <select 
-              id="userType" 
-              name="userType" 
-              value={formData.userType}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Selecione...</option>
-              <option value="administrador">Administrador</option>
-              <option value="professor">Professor</option>
-              <option value="mentor">Mentor</option>
-              <option value="aluno">Aluno</option>
-            </select>
-          </div>
-          <button type="submit" className="btn btn-primary">Entrar</button>
+
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? 'Entrando...' : 'Entrar'}
+          </button>
         </form>
+
+        <div className="modal-footer" style={{ marginTop: '15px', textAlign: 'center' }}>
+          <p>
+            Ainda não tem conta?{' '}
+            <button
+              type="button"
+              onClick={onShowRegister}
+              className="btn-link"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#007bff',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: '1em'
+              }}
+            >
+              Registre-se
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   )
 }
 
 export default LoginModal
-
