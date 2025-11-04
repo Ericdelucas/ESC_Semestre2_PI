@@ -15,3 +15,33 @@ cd ESC_Semestre2_PI > ESC > muu > muu
 npm install
 npm run dev  # Defina VITE_API_URL=http://localhost:3000
 
+
+🗂️ Estrutura do projeto:
+
+    ESC_Semestre2_PI/
+    └── ESC/
+        └── muu/
+            └── muu/
+                ├── public/
+                ├── src/
+                │   ├── assets/
+                │   ├── components/
+                │   │   ├── Monitoring/
+                │   │   │   ├── CountdownTimer.jsx
+                │   │   │   ├── Timeline.jsx
+                │   │   │   └── StudentInput.jsx
+                │   │   ├── Goals/
+                │   │   │   ├── GoalsCalendar.jsx
+                │   │   │   └── AdminGoalsView.jsx
+                │   │   ├── Doacoes.jsx
+                │   │   ├── Relatorios.jsx
+                │   │   ├── Metas.jsx
+                │   │   └── ...
+                │   ├── services/
+                │   │   └── api.js
+                │   ├── App.jsx
+                │   ├── main.jsx
+                │   └── index.css
+                ├── package.json
+                └── vite.config.js
+
