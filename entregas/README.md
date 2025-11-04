@@ -74,17 +74,114 @@ Encontre o index.html na pasta executáveis e execute-o como uma página WEB (at
 
 ## 💻 Configuração para Desenvolvimento
 
-Descreva como instalar todas as dependências para desenvolvimento e como rodar um test-suite automatizado de algum tipo. Se necessário, faça isso para múltiplas plataformas.
+Este guia explica como preparar e rodar o projeto Lideranças Empáticas em ambiente local.
 
-Para abrir este projeto você necessita das seguintes ferramentas:
+🗂️ 1. Caminho do projeto
 
--<a href="https://godotengine.org/download">GODOT</a>
+Abra o terminal dentro da pasta:
+<pre>
+ESC_Semestre2_PI\muu\muu
+</pre>
 
-```sh
-make install
-npm test
-Coloque código do prompt de comnando se for necessário
-```
+📌 Dica: Se estiver usando o VS Code, clique com o botão direito nessa pasta e escolha
+“Abrir no Terminal Integrado”.
+
+🧩 2. Verifique se o Node.js e o NPM estão instalados
+
+Execute no terminal:
+<pre>
+node -v
+npm -v
+</pre>
+✅ Se aparecer algo como:
+<pre>
+v20.12.0
+10.5.0
+</pre>
+
+significa que o Node e o NPM estão instalados corretamente.
+
+⚠️ Se aparecer “node não é reconhecido”,
+baixe e instale o Node.js:
+👉 https://nodejs.org/en
+
+📦 3. Instale as dependências principais
+
+Dentro da pasta do projeto, execute:
+<pre>
+npm install
+</pre>
+
+Esse comando instala todas as dependências listadas no package.json.
+Após a instalação, uma pasta chamada node_modules será criada automaticamente.
+
+🔐 4. Instale as dependências adicionais (backend)
+
+Esses pacotes garantem o funcionamento correto da API e da conexão com o banco de dados:
+<pre>  
+npm install express mysql2 dotenv bcrypt jsonwebtoken uuid crypto
+</pre>
+
+📘 Descrição dos pacotes:
+
+* express → framework do servidor Node.js
+
+* mysql2 → conexão com o banco MySQL
+
+* dotenv → leitura das variáveis do arquivo .env
+
+* bcrypt → criptografia de senhas
+
+* jsonwebtoken → autenticação JWT
+
+* uuid → geração de IDs únicos
+
+* crypto → funções criptográficas complementares
+
+⚙️ 5. Instale o Nodemon (modo de desenvolvimento automático)
+
+O Nodemon reinicia o servidor automaticamente sempre que você salva alguma alteração no código:
+<pre>
+npm install -g nodemon
+</pre>
+ou, se preferir instalar apenas no projeto:
+<pre>
+npm install nodemon --save-dev
+</pre>
+
+🚀 6. Inicie o servidor
+
+Para rodar o backend em modo de desenvolvimento, execute:
+<pre>
+npm run dev
+</pre>
+
+Se tudo estiver correto, você verá algo parecido com isto no terminal:
+
+Servidor rodando na porta 3001
+Acesse: http://localhost:3001/api
+Health check: http://localhost:3001/api/health
+
+🧠 7. Teste o servidor
+
+Abra o navegador ou o Postman e acesse:
+
+http://localhost:3001/api/test
+
+
+Você deve ver uma resposta semelhante a:
+<pre>
+{
+  "message": "API Lideranças Empáticas funcionando!",
+  "timestamp": "2025-10-29T23:10:00.000Z",
+  "version": "1.0.0",
+  "database": "MySQL"
+}
+</pre>
+
+
+
+
 
 ## 📋 Licença/License
 Utilize o link <https://chooser-beta.creativecommons.org/> para fazer uma licença CC BY 4.0. -->
@@ -94,7 +191,3 @@ Utilize o link <https://chooser-beta.creativecommons.org/> para fazer uma licen�
 Aqui estão as referências usadas no projeto.
 
 1. <https://liderancasempaticas.com/>
-2. <https://github.com/gabrieldejesus/readme-model>
-3. <https://www.figma.com/>
-4. <https://www.toptal.com/developers/gitignore>
-5. <https://www.youtube.com/>
