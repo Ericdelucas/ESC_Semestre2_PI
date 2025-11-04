@@ -15,17 +15,19 @@ Os campos created_at e updated_at (TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON
 UPDATE CURRENT_TIMESTAMP) armazenam a data de criação e a última atualização do
 registro. <br>
 
-CREATE TABLE usuarios ( <br>
-id INT AUTO_INCREMENT PRIMARY KEY, <br>
-name VARCHAR(255) NOT NULL, <br>
-email VARCHAR(255) UNIQUE NOT NULL, <br>
-password VARCHAR(255) NOT NULL, <br>
-tipo ENUM('administrador', 'professor', 'aluno', 'mentor') DEFAULT 'aluno', <br>
-ativo BOOLEAN DEFAULT TRUE, <br>
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, <br>
+<pre>
+CREATE TABLE usuarios ( 
+id INT AUTO_INCREMENT PRIMARY KEY, 
+name VARCHAR(255) NOT NULL, 
+email VARCHAR(255) UNIQUE NOT NULL, 
+password VARCHAR(255) NOT NULL, 
+tipo ENUM('administrador', 'professor', 'aluno', 'mentor') DEFAULT 'aluno', 
+ativo BOOLEAN DEFAULT TRUE, 
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE
-CURRENT_TIMESTAMP <br>
+CURRENT_TIMESTAMP 
 );
+</pre>
 
 <hr>
 
@@ -49,23 +51,23 @@ Os campos created_at e updated_at ( created_at TIMESTAMP DEFAULT
 CURRENT_TIMESTAMP,
 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE
 CURRENT_TIMESTAMP)registram datas de criação e atualização de cada projeto. <br>
-
-CREATE TABLE edicoes ( <br>
-id INT AUTO_INCREMENT PRIMARY KEY, <br>
-nome VARCHAR(255) NOT NULL, <br>
-dataInicio DATE NOT NULL, <br>
-dataFim DATE NOT NULL, <br>
-descricao TEXT, <br>
-status ENUM('Planejada', 'Em Andamento', 'Finalizada') DEFAULT 'Planejada', <br>
-meta_financeira DECIMAL(10,2) DEFAULT 0.00, <br>
-valor_arrecadado DECIMAL(10,2) DEFAULT 0.00, <br>
-numero_participantes INT DEFAULT 0, <br>
-numero_equipes INT DEFAULT 0, <br>
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, <br>
+<pre>
+CREATE TABLE edicoes ( 
+id INT AUTO_INCREMENT PRIMARY KEY, 
+nome VARCHAR(255) NOT NULL, 
+dataInicio DATE NOT NULL, 
+dataFim DATE NOT NULL, 
+descricao TEXT, 
+status ENUM('Planejada', 'Em Andamento', 'Finalizada') DEFAULT 'Planejada', 
+meta_financeira DECIMAL(10,2) DEFAULT 0.00, 
+valor_arrecadado DECIMAL(10,2) DEFAULT 0.00, 
+numero_participantes INT DEFAULT 0, 
+numero_equipes INT DEFAULT 0, 
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE
-CURRENT_TIMESTAMP <br>
-);<br>
-
+CURRENT_TIMESTAMP 
+);
+</pre>
 <hr>
 
 # 3. Tabela participantes
@@ -97,28 +99,29 @@ Os campos (INDEX idx_participantes_email (email), INDEX idx_participantes_tipo (
 idx_participantes_edicao (edicao_id)) para localizar o registro muito mais
 rápido, sem precisar verificar linha por linha. <br>
 
-CREATE TABLE participantes ( <br>
-id INT AUTO_INCREMENT PRIMARY KEY, <br>
-nome VARCHAR(255) NOT NULL, <br>
-email VARCHAR(255) UNIQUE NOT NULL, <br>
-telefone VARCHAR(20), <br>
-tipo ENUM('aluno', 'mentor', 'professor', 'voluntario') NOT NULL, <br>
-curso VARCHAR(255), <br>
-semestre INT, <br>
-ra VARCHAR(50), <br>
-edicao_id INT, <br>
-equipe_id INT, <br>
-pontuacao_total INT DEFAULT 0, <br>
-ativo BOOLEAN DEFAULT TRUE, <br>
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, <br>
+<pre>
+CREATE TABLE participantes ( 
+id INT AUTO_INCREMENT PRIMARY KEY, 
+nome VARCHAR(255) NOT NULL, 
+email VARCHAR(255) UNIQUE NOT NULL, 
+telefone VARCHAR(20), 
+tipo ENUM('aluno', 'mentor', 'professor', 'voluntario') NOT NULL,
+curso VARCHAR(255), 
+semestre INT, 
+ra VARCHAR(50), 
+edicao_id INT, 
+equipe_id INT, 
+pontuacao_total INT DEFAULT 0, 
+ativo BOOLEAN DEFAULT TRUE, 
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE
-CURRENT_TIMESTAMP, <br>
-FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL, <br>
-INDEX idx_participantes_email (email), <br>
-INDEX idx_participantes_tipo (tipo), <br>
-INDEX idx_participantes_edicao (edicao_id) <br>
-); <br>
-
+CURRENT_TIMESTAMP, 
+FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL, 
+INDEX idx_participantes_email (email), 
+INDEX idx_participantes_tipo (tipo), 
+INDEX idx_participantes_edicao (edicao_id) 
+);
+</pre>
 <hr>
 
 # 4. Tabela equipes
@@ -143,25 +146,26 @@ Os campos (INDEX idx_equipes_edicao (edicao_id), INDEX idx_equipes_status(status
 localizar o registro muito mais
 rápido, sem precisar verificar linha por linha. <br>
 
-CREATE TABLE equipes ( <br>
-id INT AUTO_INCREMENT PRIMARY KEY, <br>
-nome VARCHAR(255) NOT NULL, <br>
-mentor VARCHAR(255), <br>
-mentor_email VARCHAR(255), <br>
-edicao_id INT, <br>
-numero_membros INT DEFAULT 0, <br>
-meta_financeira DECIMAL(10,2) DEFAULT 0.00, <br>
-valor_arrecadado DECIMAL(10,2) DEFAULT 0.00, <br>
-pontuacao_total INT DEFAULT 0, <br>
-status ENUM('Ativa', 'Inativa', 'Finalizada') DEFAULT 'Ativa', <br>
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, <br>
+<pre>
+CREATE TABLE equipes ( 
+id INT AUTO_INCREMENT PRIMARY KEY, 
+nome VARCHAR(255) NOT NULL, 
+mentor VARCHAR(255), 
+mentor_email VARCHAR(255), 
+edicao_id INT, 
+numero_membros INT DEFAULT 0, 
+meta_financeira DECIMAL(10,2) DEFAULT 0.00, 
+valor_arrecadado DECIMAL(10,2) DEFAULT 0.00, 
+pontuacao_total INT DEFAULT 0, 
+status ENUM('Ativa', 'Inativa', 'Finalizada') DEFAULT 'Ativa', 
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE
-CURRENT_TIMESTAMP, <br>
-FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL, <br>
-INDEX idx_equipes_edicao (edicao_id), <br>
-INDEX idx_equipes_status (status) <br>
-); <br>
-
+CURRENT_TIMESTAMP, 
+FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL,
+INDEX idx_equipes_edicao (edicao_id), 
+INDEX idx_equipes_status (status) 
+); 
+</pre>
 <hr>
 
 # 5. Tabela atividades
@@ -193,32 +197,33 @@ INDEX idx_atividades_status (status), INDEX idx_atividades_data (data_inicio, da
 são usados para deixar as consultas mais rápidas, permitindo localizar atividades com mais
 eficiência por equipe, tipo, status ou intervalo de datas. <br>
 
-CREATE TABLE atividades ( <br>
-id INT AUTO_INCREMENT PRIMARY KEY, <br>
-nome VARCHAR(255) NOT NULL, <br>
-tipo ENUM('arrecadacao', 'evento', 'campanha', 'workshop', 'palestra', 'outro') NOT NULL, <br>
-descricao TEXT, <br>
-equipe_id INT, <br>
-edicao_id INT, <br>
-responsavel VARCHAR(255), <br>
-data_inicio DATE, <br>
-data_fim DATE, <br>
-meta_financeira DECIMAL(10,2) DEFAULT 0.00, <br>
-valor_arrecadado DECIMAL(10,2) DEFAULT 0.00, <br>
-status ENUM('Pendente', 'Em Andamento', 'Concluída', 'Cancelada') DEFAULT 'Pendente', <br>
-local VARCHAR(255), <br>
-observacoes TEXT, <br>
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, <br>
+<pre>
+CREATE TABLE atividades ( 
+id INT AUTO_INCREMENT PRIMARY KEY, 
+nome VARCHAR(255) NOT NULL, 
+tipo ENUM('arrecadacao', 'evento', 'campanha', 'workshop', 'palestra', 'outro') NOT NULL, 
+descricao TEXT, 
+equipe_id INT, 
+edicao_id INT, 
+responsavel VARCHAR(255), 
+data_inicio DATE, 
+data_fim DATE, 
+meta_financeira DECIMAL(10,2) DEFAULT 0.00, 
+valor_arrecadado DECIMAL(10,2) DEFAULT 0.00, 
+status ENUM('Pendente', 'Em Andamento', 'Concluída', 'Cancelada') DEFAULT 'Pendente', 
+local VARCHAR(255), 
+observacoes TEXT, 
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE
-CURRENT_TIMESTAMP, <br>
-FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL, <br>
-FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL, <br>
-INDEX idx_atividades_equipe (equipe_id), <br>
-INDEX idx_atividades_tipo (tipo), <br>
-INDEX idx_atividades_status (status), <br>
-INDEX idx_atividades_data (data_inicio, data_fim) <br>
-); <br>
-
+CURRENT_TIMESTAMP, 
+FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL, 
+FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL, 
+INDEX idx_atividades_equipe (equipe_id), 
+INDEX idx_atividades_tipo (tipo), 
+INDEX idx_atividades_status (status), 
+INDEX idx_atividades_data (data_inicio, data_fim) 
+); 
+</pre>
 <hr>
 
 # 6. Tabela doacoes
@@ -265,35 +270,36 @@ para otimizar as buscas e consultas no banco de dados. <br>
 Eles tornam mais rápidas as pesquisas filtradas por data da doação, nome do aluno
 responsável, equipe associada ou categoria da doação (como alimento, roupa etc.). <br>
 
-CREATE TABLE doacoes ( <br>
-id INT AUTO_INCREMENT PRIMARY KEY, <br>
-data_doacao DATE NOT NULL, <br>
-aluno_responsavel VARCHAR(255) NOT NULL, <br>
-aluno_ra VARCHAR(50), <br>
-equipe_id INT, <br>
-atividade_id INT, <br>
-item_doacao VARCHAR(255) NOT NULL, <br>
+<pre>
+CREATE TABLE doacoes ( 
+id INT AUTO_INCREMENT PRIMARY KEY, 
+data_doacao DATE NOT NULL, 
+aluno_responsavel VARCHAR(255) NOT NULL, 
+aluno_ra VARCHAR(50), 
+equipe_id INT, 
+atividade_id INT, 
+item_doacao VARCHAR(255) NOT NULL, 
 categoria ENUM('alimento', 'roupa', 'brinquedo', 'material_escolar', 'higiene', 'outro') NOT
-NULL, <br>
-quantidade DECIMAL(10,2) NOT NULL, <br>
-unidade VARCHAR(50) DEFAULT 'unidade', <br>
-valor_estimado DECIMAL(10,2) DEFAULT 0.00, <br>
-campanha VARCHAR(255), <br>
-doador VARCHAR(255), <br>
-doador_contato VARCHAR(255), <br>
-pontuacao INT NOT NULL DEFAULT 0, <br>
-observacoes TEXT, <br>
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, <br>
+NULL, 
+quantidade DECIMAL(10,2) NOT NULL, 
+unidade VARCHAR(50) DEFAULT 'unidade', 
+valor_estimado DECIMAL(10,2) DEFAULT 0.00, 
+campanha VARCHAR(255), 
+doador VARCHAR(255), 
+doador_contato VARCHAR(255),
+pontuacao INT NOT NULL DEFAULT 0, 
+observacoes TEXT, 
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE
-CURRENT_TIMESTAMP, <br>
-FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL, <br>
-FOREIGN KEY (atividade_id) REFERENCES atividades(id) ON DELETE SET NULL, <br>
-INDEX idx_doacoes_data (data_doacao), <br>
-INDEX idx_doacoes_aluno (aluno_responsavel), <br>
-INDEX idx_doacoes_equipe (equipe_id), <br>
-INDEX idx_doacoes_categoria (categoria) <br>
-); <br>
-
+CURRENT_TIMESTAMP, 
+FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL, 
+FOREIGN KEY (atividade_id) REFERENCES atividades(id) ON DELETE SET NULL, 
+INDEX idx_doacoes_data (data_doacao), 
+INDEX idx_doacoes_aluno (aluno_responsavel), 
+INDEX idx_doacoes_equipe (equipe_id), 
+INDEX idx_doacoes_categoria (categoria) 
+); 
+</pre>
 <hr>
 
 # 7. Tabela metas
@@ -331,32 +337,34 @@ melhorar o desempenho das consultas no banco de dados. <br>
 Eles permitem buscar e filtrar metas de forma mais rápida — seja por equipe, status (pendente,
 concluída etc.), prioridade (baixa, média, alta) ou pelo intervalo de datas de início e término. <br>
 
-CREATE TABLE metas ( <br>
-id INT AUTO_INCREMENT PRIMARY KEY, <br>
-titulo VARCHAR(255) NOT NULL, <br>
-descricao TEXT, <br>
-equipe VARCHAR(255) NOT NULL, <br>
-equipe_id INT, <br>
-responsavel VARCHAR(255), <br>
-data_inicio DATE NOT NULL, <br>
-data_fim DATE NOT NULL, <br>
-prioridade ENUM('baixa', 'media', 'alta') DEFAULT 'media', <br>
+<pre>
+CREATE TABLE metas ( 
+id INT AUTO_INCREMENT PRIMARY KEY, 
+titulo VARCHAR(255) NOT NULL, 
+descricao TEXT, 
+equipe VARCHAR(255) NOT NULL, 
+equipe_id INT, 
+responsavel VARCHAR(255), 
+data_inicio DATE NOT NULL, 
+data_fim DATE NOT NULL, 
+prioridade ENUM('baixa', 'media', 'alta') DEFAULT 'media', 
 status ENUM('pendente', 'em_andamento', 'concluida', 'atrasada', 'cancelada') DEFAULT
-'pendente', <br>
-progresso INT DEFAULT 0, <br>
-meta_numerica DECIMAL(10,2), <br>
-valor_atual DECIMAL(10,2) DEFAULT 0.00, <br>
-unidade VARCHAR(50), <br>
-observacoes TEXT, <br>
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, <br>
+'pendente', 
+progresso INT DEFAULT 0, 
+meta_numerica DECIMAL(10,2), 
+valor_atual DECIMAL(10,2) DEFAULT 0.00, 
+unidade VARCHAR(50), 
+observacoes TEXT, 
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE
-CURRENT_TIMESTAMP, <br>
-FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL, <br>
-INDEX idx_metas_equipe (equipe_id), <br>
-INDEX idx_metas_status (status), <br>
-INDEX idx_metas_prioridade (prioridade), <br>
-INDEX idx_metas_data (data_inicio, data_fim) <br>
-); <br>
+CURRENT_TIMESTAMP, 
+FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL, 
+INDEX idx_metas_equipe (equipe_id), 
+INDEX idx_metas_status (status), 
+INDEX idx_metas_prioridade (prioridade), 
+INDEX idx_metas_data (data_inicio, data_fim) 
+); 
+</pre>
 
 <hr>
 
@@ -390,23 +398,24 @@ O primeiro facilita a localização de relatórios por tipo (como geral, equipe,
 ou participação), e o segundo otimiza pesquisas baseadas em períodos de tempo, permitindo
 filtrar relatórios entre datas específicas de forma mais eficiente. <br>
 
-CREATE TABLE relatorios ( <br>
-id INT AUTO_INCREMENT PRIMARY KEY, titulo VARCHAR(255) NOT NULL, <br>
-tipo ENUM('geral', 'equipe', 'atividade', 'financeiro', 'participacao') NOT NULL, <br>
-periodo_inicio DATE, <br>
-periodo_fim DATE, <br>
-equipe_id INT, <br>
-edicao_id INT, <br>
-gerado_por VARCHAR(255), <br>
-dados_json JSON, <br>
-arquivo_path VARCHAR(500), <br>
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, <br>
-FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL, <br>
-FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL, <br>
-INDEX idx_relatorios_tipo (tipo), <br>
-INDEX idx_relatorios_periodo (periodo_inicio, periodo_fim) <br>
-); <br>
-
+<pre>
+CREATE TABLE relatorios ( 
+id INT AUTO_INCREMENT PRIMARY KEY, titulo VARCHAR(255) NOT NULL, 
+tipo ENUM('geral', 'equipe', 'atividade', 'financeiro', 'participacao') NOT NULL, 
+periodo_inicio DATE, 
+periodo_fim DATE, 
+equipe_id INT, 
+edicao_id INT, 
+gerado_por VARCHAR(255), 
+dados_json JSON, 
+arquivo_path VARCHAR(500), 
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL, 
+FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL, 
+INDEX idx_relatorios_tipo (tipo), 
+INDEX idx_relatorios_periodo (periodo_inicio, periodo_fim) 
+); 
+</pre>
 <hr>
 
 # 9. Tabela monitoramento
@@ -439,23 +448,25 @@ Os índices (INDEX idx_monitoramento_data (data_registro),) e (INDEX
 idx_monitoramento_equipe (equipe_id),)são utilizados para otimizar o desempenho das
 consultas. <br>
 
-CREATE TABLE monitoramento ( <br>
-id INT AUTO_INCREMENT PRIMARY KEY, <br>
-data_registro DATE NOT NULL, <br>
-equipe_id INT, <br>
-aluno_responsavel VARCHAR(255), <br>
-atividade VARCHAR(255), <br>
-tempo_dedicado INT, -- em minutos <br>
-descricao_atividade TEXT, <br>
-resultados TEXT, <br> 
-dificuldades TEXT, <br>
-proximos_passos TEXT, <br>
-status_geral ENUM('excelente', 'bom', 'regular', 'ruim') DEFAULT 'bom', <br>
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, <br>
-FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL, <br>
-INDEX idx_monitoramento_data (data_registro), <br>
-INDEX idx_monitoramento_equipe (equipe_id) <br>
-); <br>
+<pre>
+CREATE TABLE monitoramento ( 
+id INT AUTO_INCREMENT PRIMARY KEY, 
+data_registro DATE NOT NULL, 
+equipe_id INT, 
+aluno_responsavel VARCHAR(255), 
+atividade VARCHAR(255), 
+tempo_dedicado INT, -- em minutos 
+descricao_atividade TEXT, 
+resultados TEXT, 
+dificuldades TEXT, 
+proximos_passos TEXT, 
+status_geral ENUM('excelente', 'bom', 'regular', 'ruim') DEFAULT 'bom', 
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL, 
+INDEX idx_monitoramento_data (data_registro), 
+INDEX idx_monitoramento_equipe (equipe_id) 
+);
+</pre>
 
 <hr>
 
@@ -475,15 +486,17 @@ etc). <br>
 O campo relacionado_tipo (VARCHAR(50)) indica a tabela à qual a imagem está associada. <br>
 O campo created_at registra o momento em que a imagem foi adicionada. <br>
 
-CREATE TABLE images ( <br>
-id INT AUTO_INCREMENT PRIMARY KEY, <br>
-img VARCHAR(500) NOT NULL, <br>
-titulo VARCHAR(255), <br>
-descricao TEXT, <br>
-categoria ENUM('atividade', 'evento', 'doacao', 'equipe', 'geral') DEFAULT 'geral', <br>
-relacionado_id INT, -- ID da tabela relacionada (atividade, equipe, etc.) <br>
-relacionado_tipo VARCHAR(50), -- tipo da tabela relacionada <br>
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP <br>
-); <br>
+<pre>
+CREATE TABLE images (
+id INT AUTO_INCREMENT PRIMARY KEY, 
+img VARCHAR(500) NOT NULL, 
+titulo VARCHAR(255), 
+descricao TEXT, 
+categoria ENUM('atividade', 'evento', 'doacao', 'equipe', 'geral') DEFAULT 'geral', 
+relacionado_id INT, -- ID da tabela relacionada (atividade, equipe, etc.) 
+relacionado_tipo VARCHAR(50), -- tipo da tabela relacionada 
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+); 
+</pre>
 
 <hr>
