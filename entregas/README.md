@@ -16,7 +16,7 @@
 
 <p align="center">
   <img 
-    src="entregas/imagens/bem-vindo.png" 
+    src="imagens/bem-vindo.png" 
     alt="Lideranças Empáticas" 
     border="0">
   <br>
