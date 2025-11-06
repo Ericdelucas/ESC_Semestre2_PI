@@ -39,6 +39,7 @@ function Header({ user, onLogin, onLogout, onNavigate, currentSection }) {
             <li><a className={currentSection === 'monitoramento' ? 'active' : ''} onClick={() => onNavigate('monitoramento')}>Monitoramento</a></li>
             <li><a className={currentSection === 'doacoes' ? 'active' : ''} onClick={() => onNavigate('doacoes')}>Doações</a></li>
             <li><a className={currentSection === 'metas' ? 'active' : ''} onClick={() => onNavigate('metas')}>Metas</a></li>
+            <li><a className={currentSection === 'graficos' ? 'active' : ''} onClick={() => onNavigate('graficos')}>Gráficos</a></li>
           </ul>
         </nav>
 

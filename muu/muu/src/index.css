@@ -1723,67 +1723,96 @@ footer {
     text-decoration: underline;
 }
 
-/* Perfil */
+/* === PERFIL === */
 .perfil-page {
+    display: none; /* 🔒 Escondido por padrão */
     max-width: 600px;
     margin: 2rem auto;
     background: #fff;
     padding: 2rem;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.3s ease;
+  }
   
-.perfil-container {
+  .perfil-page.active {
+    display: block; /* ✅ Mostra apenas quando ativo */
+    opacity: 1;
+  }
+  
+  .perfil-container {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-}
+    align-items: center;
+  }
   
-.foto-container {
+  .foto-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
+  }
   
-.perfil-foto {
+  .perfil-foto {
     width: 120px;
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 1rem;
-}
+  }
   
-.perfil-info label {
+  .perfil-info {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .perfil-info label {
     font-weight: bold;
-    margin-top: 1rem;
-}
+    margin-top: 0.5rem;
+    color: #333;
+  }
   
-.perfil-info input {
+  .perfil-info input {
     width: 100%;
     padding: 0.6rem;
     border: 1px solid #ddd;
     border-radius: 8px;
-}
+    font-size: 1rem;
+  }
   
-.btn {
+  /* === BOTÕES === */
+  .btn {
     padding: 0.7rem 1.2rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     margin-top: 1rem;
-}
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
   
-.btn-primary {
-    background-color: #4CAF50;
+  .btn-primary {
+    background-color: #4caf50;
     color: white;
-}
+  }
   
-.btn-danger {
-    background-color: #E74C3C;
+  .btn-primary:hover {
+    background-color: #3e8e41;
+  }
+  
+  .btn-danger {
+    background-color: #e74c3c;
     color: white;
-}
-
-.user-menu {
+  }
+  
+  .btn-danger:hover {
+    background-color: #c0392b;
+  }
+  
+  /* === MENU DO USUÁRIO (HEADER) === */
+  .user-menu {
     position: relative;
     display: inline-block;
   }
@@ -1796,11 +1825,12 @@ footer {
     display: flex;
     align-items: center;
     cursor: pointer;
+    gap: 8px;
   }
   
   .user-info i {
-    margin-right: 8px;
     font-size: 1.5rem;
+    color: #1abc9c;
   }
   
   .user-avatar {
@@ -1808,21 +1838,23 @@ footer {
     height: 35px;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 8px;
   }
   
+  /* === DROPDOWN MENU === */
   .dropdown-menu {
     position: absolute;
     right: 0;
     background: #fff;
     color: #333;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 5px;
     z-index: 100;
+    min-width: 160px;
+    animation: fadeIn 0.2s ease;
   }
   
   .dropdown-menu button {
@@ -1833,9 +1865,40 @@ footer {
     text-align: left;
     cursor: pointer;
     border-radius: 5px;
+    font-size: 0.95rem;
+    transition: background 0.2s;
   }
   
   .dropdown-menu button:hover {
     background-color: #f0f0f0;
+  }
+  
+  /* === ANIMAÇÃO SUAVE === */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* === RESPONSIVIDADE === */
+  @media (max-width: 768px) {
+    .perfil-page {
+      margin: 1rem;
+      padding: 1.5rem;
+    }
+  
+    .perfil-foto {
+      width: 100px;
+      height: 100px;
+    }
+  
+    .btn {
+      width: 100%;
+    }
   }
   

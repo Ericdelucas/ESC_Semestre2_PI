@@ -1,149 +1,123 @@
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
-const Perfil = ({ onLogout }) => {
-  const [user, setUser] = useState(null);
-  const [nome, setNome] = useState("");
+function Perfil({ active, user, onUserUpdate, onLogout, onDeleteAccount }) {
+  const [nome, setNome] = useState(user?.name || "");
   const [foto, setFoto] = useState(null);
   const [mensagem, setMensagem] = useState("");
 
   const token = localStorage.getItem("token");
 
-  // 🔄 Buscar dados do usuário
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        if (!token) {
-          setMensagem("Sessão expirada. Faça login novamente.");
-          if (onLogout) onLogout();
-          return;
-        }
+    if (user) setNome(user.name || "");
+  }, [user]);
 
-        const res = await axios.get("http://localhost:3001/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  if (!user) return null;
 
-        setUser(res.data.user);
-        setNome(res.data.user.name);
-      } catch (error) {
-        console.error("Erro ao carregar perfil:", error);
-        setMensagem("Token inválido ou expirado. Faça login novamente.");
-        localStorage.removeItem("token");
-        if (onLogout) onLogout();
-      }
-    };
-
-    fetchUser();
-    // ❌ não colocar onLogout nas dependências → causa reexecuções infinitas
-  }, [token]);
-
-  // ✏️ Atualizar nome
+  // 🔄 Atualizar nome do perfil
   const handleUpdate = async () => {
-    try {
-      if (!nome.trim()) {
-        setMensagem("O nome não pode estar vazio.");
-        return;
-      }
+    if (!nome.trim()) {
+      setMensagem("⚠️ O nome não pode estar vazio.");
+      return;
+    }
 
+    try {
       const res = await axios.put(
         `http://localhost:3001/api/auth/update/${user.id}`,
         { nome },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setMensagem(res.data.message || "Perfil atualizado com sucesso!");
+      const updatedUser = { ...user, name: nome };
+      onUserUpdate(updatedUser);
+      setMensagem(res.data.message || "✅ Perfil atualizado com sucesso!");
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);
-      setMensagem("Erro ao atualizar perfil.");
+      setMensagem("❌ Erro ao atualizar perfil.");
     }
   };
 
-  // 🗑️ Deletar conta
+  // ❌ Deletar conta
   const handleDelete = async () => {
+    if (!window.confirm("Tem certeza que deseja excluir sua conta?")) return;
+
     try {
-      if (!token) {
-        setMensagem("Sessão expirada. Faça login novamente.");
-        if (onLogout) onLogout();
-        return;
-      }
-
-      const confirmar = window.confirm("Tem certeza que deseja deletar sua conta?");
-      if (!confirmar) return;
-
-      const res = await axios.delete("http://localhost:3001/api/auth/delete", {
+      await axios.delete("http://localhost:3001/api/auth/delete", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      alert(res.data.message || "Conta excluída com sucesso.");
-      localStorage.removeItem("token");
-      if (onLogout) onLogout();
+      alert("Conta excluída com sucesso!");
+      onDeleteAccount();
     } catch (error) {
       console.error("Erro ao deletar conta:", error);
-      setMensagem("Erro ao deletar conta. Tente novamente mais tarde.");
+      setMensagem("❌ Erro ao deletar conta.");
     }
   };
 
-  if (!user) {
-    return (
-      <div className="perfil-page text-center">
-        <p>{mensagem || "Carregando perfil..."}</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="perfil-page">
-      <h2 style={{ color: "#146C43", textAlign: "center", marginBottom: "1.5rem" }}>
-        Meu Perfil
-      </h2>
-
+    <section className={`section perfil-page ${active ? "active" : ""}`}>
       <div className="perfil-container">
-        {/* Foto de perfil */}
-        <div className="foto-container">
-          {foto ? (
-            <img
-              src={URL.createObjectURL(foto)}
-              alt="Foto de perfil"
-              className="perfil-foto"
-            />
-          ) : (
-            <div
-              style={{
-                width: "120px",
-                height: "120px",
-                borderRadius: "50%",
-                backgroundColor: "#e8f5ee",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#666",
-                marginBottom: "1rem",
-              }}
-            >
-              Sem foto
-            </div>
-          )}
+        <h2 style={{ color: "#146C43", textAlign: "center" }}>Meu Perfil</h2>
 
-          <label className="btn btn-primary" style={{ cursor: "pointer" }}>
-            Escolher foto
+        {/* FOTO DO USUÁRIO */}
+        <div className="foto-container">
+          <div
+            style={{
+              width: "120px",
+              height: "120px",
+              borderRadius: "50%",
+              border: "3px solid #146C43",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+              backgroundColor: "#e8f5ee",
+            }}
+          >
+            {foto ? (
+              <img
+                src={URL.createObjectURL(foto)}
+                alt="Foto de perfil"
+                className="perfil-foto"
+              />
+            ) : (
+              <span style={{ color: "#666" }}>Sem foto</span>
+            )}
+          </div>
+
+          <label
+            style={{
+              color: "#146C43",
+              fontWeight: "600",
+              cursor: "pointer",
+              marginTop: "8px",
+            }}
+          >
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setFoto(e.target.files[0])}
               style={{ display: "none" }}
             />
+            Alterar foto
           </label>
         </div>
 
-        {/* Nome */}
+        {/* INFORMAÇÕES */}
         <div className="perfil-info">
-          <label>Nome:</label>
+          <label>Nome</label>
           <input
             type="text"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
           />
 
+          <label>Email</label>
+          <input type="text" value={user?.email || ""} disabled />
+
+          <label>Tipo de Usuário</label>
+          <input type="text" value={user?.tipo || ""} disabled />
+
+          {/* BOTÕES */}
           <button className="btn btn-primary" onClick={handleUpdate}>
             Atualizar Perfil
           </button>
@@ -153,14 +127,12 @@ const Perfil = ({ onLogout }) => {
           </button>
 
           {mensagem && (
-            <p style={{ marginTop: "1rem", textAlign: "center", color: "#555" }}>
-              {mensagem}
-            </p>
+            <p style={{ marginTop: "1rem", color: "#555" }}>{mensagem}</p>
           )}
         </div>
       </div>
-    </div>
+    </section>
   );
-};
+}
 
 export default Perfil;

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+
+// Componentes
 import Header from './components/Header'
 import LoginModal from './components/LoginModal'
 import Registro from './components/Registro'
@@ -14,22 +16,23 @@ import Monitoramento from './components/Monitoramento'
 import Doacoes from './components/Doacoes'
 import Metas from './components/Metas'
 import Perfil from './components/Perfil'
+import Graficos from './components/Graficos' // ✅ novo import
 
-// controle de acesso por papel
+// 🔒 Controle de acesso por tipo de usuário
 const ACCESS_MAP = {
   administrador: [
     'dashboard', 'edicoes', 'participantes', 'equipes', 'atividades',
-    'relatorios', 'monitoramento', 'doacoes', 'metas', 'perfil'
+    'relatorios', 'monitoramento', 'doacoes', 'metas', 'perfil', 'graficos' // ✅ adicionado
   ],
   professor: [
     'dashboard', 'participantes', 'equipes', 'atividades',
-    'relatorios', 'monitoramento', 'perfil'
+    'relatorios', 'monitoramento', 'perfil', 'graficos' // ✅ adicionado
   ],
   mentor: [
-    'dashboard', 'participantes', 'equipes', 'atividades', 'perfil'
+    'dashboard', 'participantes', 'equipes', 'atividades', 'perfil', 'graficos' // ✅ adicionado
   ],
   aluno: [
-    'dashboard', 'doacoes', 'perfil'
+    'dashboard', 'doacoes', 'perfil', 'graficos' // ✅ adicionado
   ]
 }
 
@@ -47,7 +50,7 @@ function App() {
   const [metas, setMetas] = useState([])
   const [doacoes, setDoacoes] = useState([])
 
-  // 🧩 Persistência de login: ao carregar o app, tenta validar o token
+  // 🔐 Verifica login persistente ao abrir o app
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
@@ -58,10 +61,12 @@ function App() {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(res.data.user)
-        setCurrentSection('dashboard') // entra direto se token válido
+        if (currentSection === 'welcome') setCurrentSection('dashboard')
       } catch (err) {
-        console.error('Token inválido ou expirado:', err)
+        console.warn('Token inválido, removendo...')
         localStorage.removeItem('token')
+        setUser(null)
+        setCurrentSection('welcome')
       }
     }
 
@@ -85,7 +90,7 @@ function App() {
     setCurrentSection('welcome')
   }
 
-  // Atualiza perfil (nome/foto)
+  // Atualiza dados do usuário
   const handleUserUpdate = (newUser) => {
     setUser(newUser)
   }
@@ -96,28 +101,34 @@ function App() {
     handleLogout()
   }
 
+  // Navegar entre seções
   const showSection = (section) => setCurrentSection(section)
 
-  // Se o usuário não tiver permissão para acessar uma seção, volta ao dashboard
+  // 🔐 Restringe seções conforme tipo de usuário
   useEffect(() => {
-    if (user && ACCESS_MAP[user.role]) {
-      if (!ACCESS_MAP[user.role].includes(currentSection)) {
+    if (user?.tipo && ACCESS_MAP[user.tipo]) {
+      if (!ACCESS_MAP[user.tipo].includes(currentSection)) {
         setCurrentSection('dashboard')
       }
     }
   }, [user, currentSection])
 
-  return (
-    <div className="App">
-      <Header
-        user={user}
-        onLogin={() => setShowLoginModal(true)}
-        onLogout={handleLogout}
-        onNavigate={showSection}
-        currentSection={currentSection}
-      />
+  // ✅ Proteção visual — fallback se tudo estiver vazio
+  const renderSection = () => {
+    if (!user && currentSection !== 'welcome') {
+      return (
+        <section className="section active">
+          <div className="container">
+            <p style={{ textAlign: 'center', marginTop: '3rem' }}>
+              ⚠️ Sua sessão expirou. Faça login novamente.
+            </p>
+          </div>
+        </section>
+      )
+    }
 
-      <main className="main">
+    return (
+      <>
         <Welcome
           active={currentSection === 'welcome'}
           onLogin={() => setShowLoginModal(true)}
@@ -201,9 +212,30 @@ function App() {
           onDeleteAccount={handleDeleteAccount}
           onLogout={handleLogout}
         />
+
+        <Graficos
+          active={currentSection === 'graficos'} // ✅ nova aba
+        />
+      </>
+    )
+  }
+
+  return (
+    <div className="App">
+      {/* 🔝 Header sempre visível */}
+      <Header
+        user={user}
+        onLogin={() => setShowLoginModal(true)}
+        onLogout={handleLogout}
+        onNavigate={showSection}
+        currentSection={currentSection}
+      />
+
+      <main className="main">
+        {renderSection()}
       </main>
 
-      {/* MODAIS */}
+      {/* 🔐 Modais */}
       <LoginModal
         show={showLoginModal}
         onClose={() => setShowLoginModal(false)}
