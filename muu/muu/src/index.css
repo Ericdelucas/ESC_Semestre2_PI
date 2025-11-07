@@ -1992,13 +1992,13 @@ footer {
 
 .sidebar .toggle-btn {
   position: absolute;
-  left: -30px;
+  left: -75px;
   top: 20px;
-  background: #4caf50;
+  background: #df0909;
   color: white;
   border: none;
   border-radius: 6px 0 0 6px;
-  width: 30px;
+  width: 75px;
   height: 30px;
   cursor: pointer;
 }
