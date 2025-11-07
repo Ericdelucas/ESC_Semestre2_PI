@@ -9,7 +9,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: #333;
-    background-image: url('/src/assets/background.png');
+    background-image: url('/src/assets/background2.png');
     background-size: cover;
 }
 
@@ -466,57 +466,255 @@ footer {
     font-size: 1rem;
 }
 
-/* Relatórios */
-.reports-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    margin-bottom: 3rem;
+/* 🎯 Estilos exclusivos do componente Relatorios */
+
+.relatorios-container {
+  padding: 2rem;
+  color: #333;
 }
 
+/* 🔹 Grid principal de relatórios */
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* 🔹 Cartões de relatório */
 .report-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border-top: 4px solid #1abc9c;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.25s ease;
+  cursor: pointer;
 }
 
 .report-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 .report-card i {
-    font-size: 3rem;
-    color: #1abc9c;
-    margin-bottom: 1rem;
+  font-size: 2rem;
+  color: #1abc9c;
+  margin-bottom: 0.5rem;
 }
 
 .report-card h3 {
-    margin-bottom: 1rem;
-    color: #1a1a1a;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
 }
 
 .report-card p {
-    color: #666;
-    font-size: 0.9rem;
+  font-size: 0.9rem;
+  color: #666;
 }
 
+/* 🔹 Área de resultado do relatório */
 .report-result {
-    background: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    display: none;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-top: 2.5rem;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.4s ease;
 }
 
-.report-result.active {
-    display: block;
+.report-result h3 {
+  font-size: 1.4rem;
+  color: #222;
+  margin-bottom: 1rem;
 }
+
+.report-result h4 {
+  margin-top: 2rem;
+  font-weight: 600;
+  color: #444;
+}
+
+/* 🔹 Estatísticas em cards */
+.dashboard-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.stat-card {
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  flex: 1 1 180px;
+  text-align: center;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.stat-card:hover {
+  background: #1abc9c;
+  color: #fff;
+  transform: scale(1.03);
+}
+
+.stat-card h4 {
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.stat-card p {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+/* 🔹 Botões */
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.3rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: #1abc9c;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #16a085;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1.8px solid #1abc9c;
+  color: #1abc9c;
+}
+
+.btn-outline:hover {
+  background: #1abc9c;
+  color: #fff;
+}
+
+/* 🔹 Tabelas */
+.table-container {
+  margin-top: 2rem;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+.data-table thead {
+  background-color: #1abc9c;
+  color: #fff;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.8rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.data-table tr:hover {
+  background: #f6f9f8;
+}
+
+/* 🔹 Modal grande (caso o relatorio de equipe use) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content.large {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 650px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: fadeIn 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  font-size: 1.4rem;
+  color: #1abc9c;
+  margin-bottom: 1.2rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  color: #444;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #1abc9c;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+/* 🔹 Animações */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 🔹 Responsivo */
+@media (max-width: 768px) {
+  .dashboard-stats {
+    flex-direction: column;
+  }
+  
+  .report-card {
+    padding: 1rem;
+  }
+
+  .modal-content.large {
+    width: 95%;
+    padding: 1.5rem;
+  }
+}
+
 
 /* ===================== MODAIS GERAIS ===================== */
 .modal { 
@@ -711,6 +909,121 @@ footer {
   scrollbar-width: none;
 }
 
+/* 🔹 Modal personalizado para Relatório de Equipe */
+.modal.modal-equipe {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.modal-equipe.active {
+  display: flex;
+}
+
+.modal-content.modal-equipe-content {
+  background-color: #fff;
+  border-radius: 16px;
+  width: 95%;
+  max-width: 850px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease;
+}
+
+.modal-content.modal-equipe-content .modal-header {
+  background: linear-gradient(135deg, #1abc9c, #16a085);
+  border-radius: 12px 12px 0 0;
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-content.modal-equipe-content h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.modal-content.modal-equipe-content .form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.modal-content.modal-equipe-content .form-image {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-start;
+}
+
+.modal-content.modal-equipe-content .foto-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #1abc9c;
+  margin-top: 0.4rem;
+}
+
+.modal-content.modal-equipe-content input,
+.modal-content.modal-equipe-content textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.modal-content.modal-equipe-content input:focus,
+.modal-content.modal-equipe-content textarea:focus {
+  outline: none;
+  border-color: #1abc9c;
+}
+
+.modal-content.modal-equipe-content .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.modal-content.modal-equipe-content .btn-primary {
+  background-color: #1abc9c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.6rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.modal-content.modal-equipe-content .btn-primary:hover {
+  background-color: #16a085;
+}
+
+.modal-content.modal-equipe-content .btn-outline {
+  background: transparent;
+  color: #1abc9c;
+  border: 2px solid #1abc9c;
+  border-radius: 8px;
+  padding: 0.8rem 1.6rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.modal-content.modal-equipe-content .btn-outline:hover {
+  background-color: #1abc9c;
+  color: white;
+}
 
 /* ========== FORMULÁRIOS ========== */
 .form-group {

@@ -61,6 +61,7 @@ async function connectToDatabase() {
 }
 
 async function initializeDatabase() {
+  // 🔹 Usuários
   await db.execute(`
     CREATE TABLE IF NOT EXISTS usuarios (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -72,6 +73,28 @@ async function initializeDatabase() {
     )
   `);
   console.log('🗃️  Tabela "usuarios" verificada.');
+
+  // 🔹 Relatórios
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS relatorios (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      titulo VARCHAR(255) NOT NULL,
+      tipo ENUM('geral', 'equipe', 'atividade', 'financeiro', 'participacao') NOT NULL,
+      periodo_inicio DATE,
+      periodo_fim DATE,
+      equipe_id INT,
+      edicao_id INT,
+      gerado_por VARCHAR(255),
+      dados_json JSON,
+      arquivo_path VARCHAR(500),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL,
+      FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL,
+      INDEX idx_relatorios_tipo (tipo),
+      INDEX idx_relatorios_periodo (periodo_inicio, periodo_fim)
+    )
+  `);
+  console.log('📊 Tabela "relatorios" verificada.');
 }
 
 // Disponibiliza função global de queries
@@ -88,6 +111,7 @@ import equipesRoutes from './src/routes/equipes.js';
 import atividadesRoutes from './src/routes/atividades.js';
 import doacoesRoutes from './src/routes/doacoes.js';
 import metasRoutes from './src/routes/metas.js';
+import relatoriosRoutes from './src/routes/relatorios.js'; // ✅ NOVO
 
 // ======== ROTAS PRINCIPAIS ======== //
 app.use('/api/auth', authRouter);
@@ -97,6 +121,7 @@ app.use('/api/equipes', equipesRoutes);
 app.use('/api/atividades', atividadesRoutes);
 app.use('/api/doacoes', doacoesRoutes);
 app.use('/api/metas', metasRoutes);
+app.use('/api/relatorios', relatoriosRoutes); // ✅ NOVA ROTA DE RELATÓRIOS
 
 // ======== ROTAS DE TESTE ======== //
 app.get('/', (req, res) => {
@@ -106,6 +131,9 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       edicoes: '/api/edicoes',
       participantes: '/api/participantes',
+      equipes: '/api/equipes',
+      atividades: '/api/atividades',
+      relatorios: '/api/relatorios',
     },
   });
 });
@@ -137,4 +165,6 @@ async function startServer() {
 
 startServer();
 
+// Exporta para uso em outras rotas
+export { db };
 export default app;

@@ -16,23 +16,24 @@ import Monitoramento from './components/Monitoramento'
 import Doacoes from './components/Doacoes'
 import Metas from './components/Metas'
 import Perfil from './components/Perfil'
-import Graficos from './components/Graficos' // ✅ novo import
+import Graficos from './components/Graficos'
+import ModalRelatorioEquipe from './modal/ModalRelatorioEquipe'
 
 // 🔒 Controle de acesso por tipo de usuário
 const ACCESS_MAP = {
   administrador: [
     'dashboard', 'edicoes', 'participantes', 'equipes', 'atividades',
-    'relatorios', 'monitoramento', 'doacoes', 'metas', 'perfil', 'graficos' // ✅ adicionado
+    'relatorios', 'monitoramento', 'doacoes', 'metas', 'perfil', 'graficos'
   ],
   professor: [
     'dashboard', 'participantes', 'equipes', 'atividades',
-    'relatorios', 'monitoramento', 'perfil', 'graficos' // ✅ adicionado
+    'relatorios', 'monitoramento', 'perfil', 'graficos'
   ],
   mentor: [
-    'dashboard', 'participantes', 'equipes', 'atividades', 'perfil', 'graficos' // ✅ adicionado
+    'dashboard', 'participantes', 'equipes', 'atividades', 'perfil', 'graficos'
   ],
   aluno: [
-    'dashboard', 'doacoes', 'perfil', 'graficos' // ✅ adicionado
+    'dashboard', 'doacoes', 'perfil', 'graficos'
   ]
 }
 
@@ -41,6 +42,9 @@ function App() {
   const [user, setUser] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
+
+  // 🔹 Novo estado global do Modal de Relatório
+  const [showRelatorioModal, setShowRelatorioModal] = useState(false)
 
   // Dados do sistema
   const [edicoes, setEdicoes] = useState([])
@@ -113,7 +117,30 @@ function App() {
     }
   }, [user, currentSection])
 
-  // ✅ Proteção visual — fallback se tudo estiver vazio
+  // 🔹 Ouve o evento global para abrir o modal de relatório
+  useEffect(() => {
+    const handleAbrirModal = () => setShowRelatorioModal(true)
+    window.addEventListener('abrirModalRelatorio', handleAbrirModal)
+    return () => window.removeEventListener('abrirModalRelatorio', handleAbrirModal)
+  }, [])
+
+  // 🔹 Submissão do relatório (pode conectar ao backend)
+  const handleSubmitRelatorio = async (dados) => {
+    try {
+      console.log('📤 Enviando relatório:', dados)
+      // Exemplo de envio — ajuste conforme seu backend
+      await axios.post('http://localhost:3001/api/relatorios', dados)
+      alert('✅ Relatório salvo com sucesso!')
+      setShowRelatorioModal(false)
+    } catch (err) {
+      console.error('Erro ao salvar relatório:', err)
+      alert('❌ Erro ao salvar relatório.')
+    }
+  }
+
+  // ============================================================
+  // ===================== RENDERIZAÇÃO =========================
+  // ============================================================
   const renderSection = () => {
     if (!user && currentSection !== 'welcome') {
       return (
@@ -214,7 +241,7 @@ function App() {
         />
 
         <Graficos
-          active={currentSection === 'graficos'} // ✅ nova aba
+          active={currentSection === 'graficos'}
         />
       </>
     )
@@ -254,6 +281,13 @@ function App() {
           setShowRegister(false)
           setShowLoginModal(true)
         }}
+      />
+
+      {/* ✅ Modal Global de Relatório */}
+      <ModalRelatorioEquipe
+        show={showRelatorioModal}
+        onClose={() => setShowRelatorioModal(false)}
+        onSubmit={handleSubmitRelatorio}
       />
     </div>
   )
