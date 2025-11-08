@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes = [], edicoes = [] }) {
+function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes = [] }) {
   const [formData, setFormData] = useState({
     dataDoacao: new Date().toISOString().split('T')[0],
     alunoResponsavel: '',
@@ -14,29 +14,38 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
 
   const [showModal, setShowModal] = useState(false)
   const [alunos, setAlunos] = useState([])
+  const [edicoes, setEdicoes] = useState([])
 
-  // 🧠 Carregar alunos do backend
+  // 🧠 Carregar alunos e edições do backend
   useEffect(() => {
-    const carregarAlunos = async () => {
+    const carregarDados = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/participantes')
-        const data = await response.json()
+        const [alunosRes, edicoesRes] = await Promise.all([
+          fetch('http://localhost:3001/api/participantes'),
+          fetch('http://localhost:3001/api/edicoes')
+        ])
 
-        if (data.data && Array.isArray(data.data)) {
-          const apenasAlunos = data.data.filter(
+        const alunosData = await alunosRes.json()
+        const edicoesData = await edicoesRes.json()
+
+        if (alunosData.data && Array.isArray(alunosData.data)) {
+          const apenasAlunos = alunosData.data.filter(
             (p) => p.tipo?.toLowerCase() === 'aluno'
           )
           setAlunos(apenasAlunos)
         }
+
+        if (edicoesData.data && Array.isArray(edicoesData.data)) {
+          setEdicoes(edicoesData.data)
+        }
       } catch (error) {
-        console.error('Erro ao carregar alunos:', error)
+        console.error('Erro ao carregar alunos/edições:', error)
       }
     }
 
-    carregarAlunos()
+    carregarDados()
   }, [])
 
-  // Itens de doação
   const itensDoacao = [
     { nome: 'Arroz', pontos: 1 },
     { nome: 'Feijão', pontos: 2 },
@@ -49,36 +58,17 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
     { nome: 'Dinheiro | Moeda', pontos: 9 }
   ]
 
-  const campanhas = [
-    'Rifa - Camisa time...',
-    'Caixa FECAP',
-    'Campanha Natal',
-    'Ação Solidária'
-  ]
-
-  const tiposDoador = [
-    'Professor',
-    'Aluno FECAP',
-    'Funcionário',
-    'Comunidade Externa'
-  ]
+  const campanhas = ['Rifa - Camisa time...', 'Caixa FECAP', 'Campanha Natal', 'Ação Solidária']
+  const tiposDoador = ['Professor', 'Aluno FECAP', 'Funcionário', 'Comunidade Externa']
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => {
       const newData = { ...prev, [name]: value }
-
-      // Calcular pontuação automaticamente
-      if (name === 'itemDoacao') {
-        const item = itensDoacao.find((item) => item.nome === value)
-        newData.pontuacao = item ? item.pontos * (parseFloat(newData.quantidade) || 1) : 0
-      }
-
-      if (name === 'quantidade') {
-        const item = itensDoacao.find((item) => item.nome === newData.itemDoacao)
-        newData.pontuacao = item ? item.pontos * (parseFloat(value) || 1) : 0
-      }
-
+      const item = itensDoacao.find((i) => i.nome === newData.itemDoacao)
+      const pontosBase = item ? item.pontos : 0
+      const quantidadeNum = parseFloat(newData.quantidade) || 0
+      newData.pontuacao = pontosBase * quantidadeNum
       return newData
     })
   }
@@ -87,7 +77,7 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
     e.preventDefault()
 
     if (!formData.alunoResponsavel || !formData.itemDoacao || !formData.quantidade || !formData.edicao) {
-      alert('Por favor, preencha todos os campos obrigatórios.')
+      alert('⚠️ Por favor, preencha todos os campos obrigatórios.')
       return
     }
 
@@ -125,51 +115,44 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
   return (
     <div className="student-input-container">
       <div className="input-header">
-        <h3>
-          <i className="fas fa-hand-holding-heart"></i> Registro de Doações
-        </h3>
-        {!showModal && (
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-            <i className="fas fa-plus"></i> Nova Doação
-          </button>
-        )}
+        <h3><i className="fas fa-hand-holding-heart"></i> Registro de Doações</h3>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+          <i className="fas fa-plus"></i> Nova Doação
+        </button>
       </div>
 
-      {/* 🧾 Tabela de Doações */}
       <div className="donations-table">
-        <h4>Doações Registradas Recentemente</h4>
+        <h4>Doações Recentes</h4>
         <div className="table-container">
           <table>
             <thead>
               <tr>
-                <th>Data da Doação</th>
-                <th>Aluno Responsável</th>
-                <th>Item de Doação</th>
+                <th>Data</th>
+                <th>Aluno</th>
+                <th>Item</th>
                 <th>Campanha</th>
                 <th>Doador</th>
-                <th>Quantidade</th>
-                <th>Pontuação</th>
+                <th>Qtd</th>
+                <th>Pontos</th>
               </tr>
             </thead>
             <tbody>
               {doacoes.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                    <i className="fas fa-info-circle"></i>
-                    <br />
-                    Nenhuma doação registrada ainda. Registre a primeira doação!
+                  <td colSpan="7" style={{ textAlign: 'center', color: '#666', padding: '16px' }}>
+                    <i className="fas fa-info-circle"></i> Nenhuma doação registrada ainda.
                   </td>
                 </tr>
               ) : (
-                doacoes.slice(0, 10).map((doacao, index) => (
-                  <tr key={index}>
-                    <td>{new Date(doacao.dataDoacao).toLocaleDateString('pt-BR')}</td>
-                    <td>{doacao.alunoResponsavel || '-'}</td>
-                    <td>{doacao.itemDoacao}</td>
-                    <td>{doacao.campanha}</td>
-                    <td>{doacao.doador}</td>
-                    <td>{doacao.quantidade}</td>
-                    <td>{doacao.pontuacao}</td>
+                doacoes.slice(0, 10).map((d, i) => (
+                  <tr key={i}>
+                    <td>{new Date(d.dataDoacao).toLocaleDateString('pt-BR')}</td>
+                    <td>{d.alunoResponsavel}</td>
+                    <td>{d.itemDoacao}</td>
+                    <td>{d.campanha}</td>
+                    <td>{d.doador}</td>
+                    <td>{d.quantidade}</td>
+                    <td>{d.pontuacao}</td>
                   </tr>
                 ))
               )}
@@ -178,7 +161,6 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
         </div>
       </div>
 
-      {/* 🪟 Modal de Nova Doação */}
       {showModal && (
         <div className="modal active">
           <div className="modal-content">
@@ -189,102 +171,47 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
 
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label>Data da Doação *</label>
+                <label>Data *</label>
                 <input type="date" name="dataDoacao" value={formData.dataDoacao} onChange={handleInputChange} required />
               </div>
 
               <div className="form-group">
-                <label>Aluno Responsável *</label>
+                <label>Aluno *</label>
                 <select name="alunoResponsavel" value={formData.alunoResponsavel} onChange={handleInputChange} required>
                   <option value="">Selecione o aluno</option>
-                  {alunos.length > 0 ? (
-                    alunos.map((aluno) => (
-                      <option key={aluno.id} value={aluno.nome}>
-                        {aluno.nome}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>⚠ Nenhum aluno encontrado</option>
-                  )}
+                  {alunos.map(a => <option key={a.id} value={a.nome}>{a.nome}</option>)}
                 </select>
               </div>
 
               <div className="form-group">
-                <label>Edição Relacionada *</label>
+                <label>Edição *</label>
                 <select name="edicao" value={formData.edicao} onChange={handleInputChange} required>
-                  <option value="">Selecione a Edição</option>
-                  {edicoes.map((edicao) => (
-                    <option key={edicao.id} value={edicao.nome}>
-                      {edicao.nome}
-                    </option>
-                  ))}
+                  <option value="">Selecione a edição</option>
+                  {edicoes.map(e => <option key={e.id} value={e.nome}>{e.nome}</option>)}
                 </select>
               </div>
 
               <div className="form-group">
-                <label>Item de Doação *</label>
+                <label>Item *</label>
                 <select name="itemDoacao" value={formData.itemDoacao} onChange={handleInputChange} required>
-                  <option value="">Selecione o item</option>
-                  {itensDoacao.map((item) => (
-                    <option key={item.nome} value={item.nome}>
-                      {item.nome} ({item.pontos} pts)
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Campanha</label>
-                <select name="campanha" value={formData.campanha} onChange={handleInputChange}>
-                  <option value="">Selecione a campanha</option>
-                  {campanhas.map((campanha) => (
-                    <option key={campanha} value={campanha}>
-                      {campanha}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Tipo de Doador</label>
-                <select name="doador" value={formData.doador} onChange={handleInputChange}>
-                  <option value="">Selecione o tipo</option>
-                  {tiposDoador.map((tipo) => (
-                    <option key={tipo} value={tipo}>
-                      {tipo}
-                    </option>
-                  ))}
+                  <option value="">Selecione</option>
+                  {itensDoacao.map(i => <option key={i.nome} value={i.nome}>{i.nome} ({i.pontos} pts)</option>)}
                 </select>
               </div>
 
               <div className="form-group">
                 <label>Quantidade *</label>
-                <input
-                  type="number"
-                  name="quantidade"
-                  value={formData.quantidade}
-                  onChange={handleInputChange}
-                  placeholder="Ex: 10.00"
-                  step="0.01"
-                  min="0"
-                  required
-                />
+                <input type="number" name="quantidade" value={formData.quantidade} onChange={handleInputChange} step="0.01" required />
               </div>
 
               <div className="form-group">
                 <label>Pontuação Calculada</label>
-                <div className="pontuacao-display">
-                  <i className="fas fa-star"></i> <span>{formData.pontuacao} pontos</span>
-                </div>
+                <div className="pontuacao-display"><i className="fas fa-star"></i> {formData.pontuacao} pontos</div>
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
-                  Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  <i className="fas fa-save"></i> Registrar Doação
-                </button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
+                <button type="submit" className="btn btn-primary"><i className="fas fa-save"></i> Salvar</button>
               </div>
             </form>
           </div>
