@@ -33,44 +33,24 @@ Por meio da plataforma, os usuários podem cadastrar alunos, equipes e campanhas
 ## 🛠 Estrutura de pastas
 
 -Raiz<br>
-|<br>
-|-->documentos<br>
-  &emsp;|-->antigos<br>
-  &emsp;|Documentação.docx<br>
-|-->executáveis<br>
-  &emsp;|-->windows<br>
-  &emsp;|-->android<br>
-  &emsp;|-->HTML<br>
-|-->imagens<br>
-|-->src<br>
-  &emsp;|-->Backend<br>
-  &emsp;|-->Frontend<br>
-|readme.md<br>
+<pre>
+  
+.
+── entregas
+   ├── documentos
+   │   ├── Entrega 1
+   │   └── Entrega 2
+   ├── imagens
+   └── src
+       ├── Entrega 1
+       └── Entrega 2
+</pre>
 
 ## 🛠 Instalação
 
-<b>Android:</b>
-
-Faça o Download do JOGO.apk no seu celular.
-Execute o APK e siga as instruções de seu telefone.
-
-```sh
-Coloque código do prompt de comnando se for necessário
-```
-
-<b>Windows:</b>
-
-Não há instalação! Apenas executável!
-Encontre o JOGO.exe na pasta executáveis e execute-o como qualquer outro programa.
-
-```sh
-Coloque código do prompt de comnando se for necessário
-```
-
 <b>HTML:</b>
 
-Não há instalação!
-Encontre o index.html na pasta executáveis e execute-o como uma página WEB (através de algum browser).
+Link do projeto: https://stunning-paletas-cbe215.netlify.app/
 
 ## 💻 Configuração para Desenvolvimento
 
@@ -81,6 +61,10 @@ Este guia explica como preparar e rodar o projeto Lideranças Empáticas em ambi
 Abra o terminal dentro da pasta:
 <pre>
 ESC_Semestre2_PI\muu\muu
+</pre>
+Ao mesmo tempo ligamos o backend:
+<pre>
+ESC_Semestre2_PI\muu\Backend
 </pre>
 
 📌 Dica: Se estiver usando o VS Code, clique com o botão direito nessa pasta e escolha
@@ -184,10 +168,12 @@ Você deve ver uma resposta semelhante a:
 
 
 ## 📋 Licença/License
-Utilize o link <https://chooser-beta.creativecommons.org/> para fazer uma licença CC BY 4.0. -->
+<a href="https://stunning-paletas-cbe215.netlify.app/">ESC-Lideranças Empaticas</a> © 2025 por <a href="https://github.com/Ericdelucas">Eric De Lucas; Stephanie Macedo; EnHsiang Chien; Joel</a> Ademir é licenciado <a href="https://creativecommons.org/licenses/by/4.0/">sob CC BY 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
 
 ## 🎓 Referências
 
 Aqui estão as referências usadas no projeto.
 
 1. <https://liderancasempaticas.com/>
+2. <https://www.linkedin.com/company/projeto-lideran%C3%A7as-emp%C3%A1ticas/>
+3. <https://www.instagram.com/liderancasempaticas/>
