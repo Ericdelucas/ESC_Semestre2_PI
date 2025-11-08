@@ -3,6 +3,34 @@ import ReactDOM from "react-dom";
 import axios from "axios";
 
 function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
+  if (!show) return null;
+
+  // 🔹 Pontuação dos itens
+  const ITEM_PONTOS = {
+    dinheiro: 9,
+    arroz: 1,
+    feijao: 2,
+    acucar: 3,
+    oleo: 4,
+    macarrao: 5,
+    fuba: 6,
+    leite: 7,
+    outro: 8,
+  };
+
+  // 🔹 Unidades
+  const UNIDADES = {
+    dinheiro: "R$",
+    arroz: "kg",
+    feijao: "kg",
+    acucar: "kg",
+    oleo: "L",
+    macarrao: "unid.",
+    fuba: "kg",
+    leite: "L",
+    outro: "unid.",
+  };
+
   const [formData, setFormData] = useState({
     nomeEquipe: "",
     mentor: "",
@@ -10,6 +38,7 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
     resultados: "",
     tipoImpacto: "dinheiro",
     quantidade: "",
+    pontosTotais: 0,
     imagem: null,
     imagemPreview: null,
   });
@@ -18,58 +47,41 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
   const [mentores, setMentores] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const UNIDADES = {
-    dinheiro: "R$",
-    arroz: "kg",
-    oleo: "L",
-    padrao: "unidades",
-  };
-
-  // ===========================================
   // 🔹 Carrega equipes e mentores do backend
-  // ===========================================
   useEffect(() => {
-    if (show) {
-      const fetchData = async () => {
-        try {
-          setLoading(true);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [eqRes, menRes] = await Promise.all([
+          axios.get("http://localhost:3001/api/equipes"),
+          axios.get("http://localhost:3001/api/participantes"),
+        ]);
 
-          const [eqRes, menRes] = await Promise.all([
-            axios.get("http://localhost:3001/api/equipes"),
-            axios.get("http://localhost:3001/api/participantes"),
-          ]);
+        const equipesData = Array.isArray(eqRes.data)
+          ? eqRes.data
+          : eqRes.data?.data || [];
 
-          // ✅ Corrige formato (usa eqRes.data.data se existir)
-          const equipesData = Array.isArray(eqRes.data)
-            ? eqRes.data
-            : eqRes.data?.data || [];
+        const mentoresData = (Array.isArray(menRes.data)
+          ? menRes.data
+          : menRes.data?.data || []
+        ).filter((p) => p.tipo === "mentor");
 
-          // ✅ Filtra apenas mentores se vierem todos os participantes
-          const mentoresData = (Array.isArray(menRes.data)
-            ? menRes.data
-            : menRes.data?.data || []
-          ).filter((p) => p.tipo === "mentor");
+        setEquipes(equipesData);
+        setMentores(mentoresData);
+      } catch (error) {
+        console.error("Erro ao carregar equipes ou mentores:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-          setEquipes(equipesData);
-          setMentores(mentoresData);
-        } catch (error) {
-          console.error("❌ Erro ao carregar equipes ou mentores:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchData();
-    }
+    if (show) fetchData();
   }, [show]);
 
-  if (!show) return null;
-
-  // ===========================================
-  // 🔹 Controle de formulário
-  // ===========================================
+  // 🔹 Atualiza dados do formulário e recalcula pontos
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
     if (files) {
       const file = files[0];
       const previewUrl = URL.createObjectURL(file);
@@ -79,7 +91,17 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
         imagemPreview: previewUrl,
       }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => {
+        const updated = { ...prev, [name]: value };
+
+        if (name === "tipoImpacto" || name === "quantidade") {
+          const fator = ITEM_PONTOS[updated.tipoImpacto] || 0;
+          const qtd = parseFloat(updated.quantidade) || 0;
+          updated.pontosTotais = fator * qtd;
+        }
+
+        return updated;
+      });
     }
   };
 
@@ -91,7 +113,7 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
       return;
     }
 
-    const unidade = UNIDADES[formData.tipoImpacto] || UNIDADES.padrao;
+    const unidade = UNIDADES[formData.tipoImpacto] || "unid.";
 
     const envio = {
       ...formData,
@@ -102,9 +124,7 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
     onSubmit(envio);
   };
 
-  // ===========================================
-  // 🔹 Renderização do modal
-  // ===========================================
+  // 🔹 Estrutura visual do modal
   const modalContent = (
     <div
       className="modal active"
@@ -133,7 +153,7 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
           animation: "modalSlideIn 0.3s ease",
         }}
       >
-        {/* HEADER */}
+        {/* Cabeçalho */}
         <div
           className="modal-header"
           style={{
@@ -146,7 +166,7 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
             alignItems: "center",
           }}
         >
-          <h2 style={{ margin: 0, fontSize: "1.3rem" }}>Criar Relatório de Equipe</h2>
+          <h2 style={{ margin: 0 }}>Criar Relatório de Equipe</h2>
           <span
             onClick={onClose}
             style={{
@@ -159,6 +179,7 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
           </span>
         </div>
 
+        {/* Corpo */}
         {loading ? (
           <div style={{ padding: "2rem", textAlign: "center" }}>
             <p>⏳ Carregando equipes e mentores...</p>
@@ -166,7 +187,12 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
         ) : (
           <form
             onSubmit={handleSubmit}
-            style={{ padding: "1.8rem", display: "flex", flexDirection: "column", gap: "1rem" }}
+            style={{
+              padding: "1.8rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem",
+            }}
           >
             {/* Equipe */}
             <div className="form-group">
@@ -177,7 +203,7 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
                 onChange={handleChange}
                 required
               >
-                <option value="">Selecione uma equipe existente</option>
+                <option value="">Selecione uma equipe</option>
                 {equipes.map((eq) => (
                   <option key={eq.id} value={eq.nome}>
                     {eq.nome}
@@ -188,7 +214,7 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
 
             {/* Mentor */}
             <div className="form-group">
-              <label>Mentor Responsável</label>
+              <label>Mentor</label>
               <select
                 name="mentor"
                 value={formData.mentor}
@@ -204,7 +230,7 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
               </select>
             </div>
 
-            {/* Campos adicionais */}
+            {/* Resumo */}
             <div className="form-group">
               <label>Resumo das Atividades</label>
               <textarea
@@ -212,11 +238,11 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
                 rows="3"
                 value={formData.resumo}
                 onChange={handleChange}
-                placeholder="Descreva as atividades..."
                 required
               />
             </div>
 
+            {/* Resultados */}
             <div className="form-group">
               <label>Resultados e Impactos</label>
               <textarea
@@ -224,10 +250,10 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
                 rows="2"
                 value={formData.resultados}
                 onChange={handleChange}
-                placeholder="Descreva os resultados..."
               />
             </div>
 
+            {/* Tipo de Impacto */}
             <div className="form-group">
               <label>Tipo de Impacto</label>
               <select
@@ -235,12 +261,15 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
                 value={formData.tipoImpacto}
                 onChange={handleChange}
               >
-                <option value="dinheiro">Dinheiro (R$)</option>
-                <option value="arroz">Arroz (kg)</option>
-                <option value="oleo">Óleo (L)</option>
+                {Object.keys(ITEM_PONTOS).map((item) => (
+                  <option key={item} value={item}>
+                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                  </option>
+                ))}
               </select>
             </div>
 
+            {/* Quantidade */}
             <div className="form-group">
               <label>Quantidade ({UNIDADES[formData.tipoImpacto]})</label>
               <input
@@ -248,61 +277,41 @@ function ModalRelatorioEquipe({ show, onClose, onSubmit = () => {} }) {
                 name="quantidade"
                 value={formData.quantidade}
                 onChange={handleChange}
-                placeholder="Ex: 200"
                 required
               />
             </div>
 
-            {/* Upload de imagem */}
+            {/* Pontos totais */}
             <div className="form-group">
-              <label>Imagem da Equipe</label>
+              <label>Pontos Obtidos</label>
+              <input type="text" readOnly value={formData.pontosTotais} />
+            </div>
+
+            {/* Upload */}
+            <div className="form-group">
+              <label>Imagem (opcional)</label>
               <input type="file" accept="image/*" onChange={handleChange} />
               {formData.imagemPreview && (
                 <img
                   src={formData.imagemPreview}
-                  alt="Prévia"
+                  alt="Preview"
                   style={{
                     width: "120px",
                     height: "120px",
-                    borderRadius: "50%",
-                    objectFit: "cover",
+                    borderRadius: "8px",
                     marginTop: "1rem",
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                    objectFit: "cover",
                   }}
                 />
               )}
             </div>
 
             {/* Botões */}
-            <div
-              className="form-actions"
-              style={{ display: "flex", justifyContent: "flex-end", gap: "1rem" }}
-            >
-              <button
-                type="button"
-                onClick={onClose}
-                style={{
-                  border: "1px solid #ccc",
-                  background: "white",
-                  color: "#333",
-                  padding: "0.6rem 1.2rem",
-                  borderRadius: "8px",
-                }}
-              >
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem" }}>
+              <button type="button" onClick={onClose} className="btn btn-outline">
                 Cancelar
               </button>
-              <button
-                type="submit"
-                style={{
-                  background: "#1abc9c",
-                  border: "none",
-                  color: "white",
-                  padding: "0.6rem 1.2rem",
-                  borderRadius: "8px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                }}
-              >
+              <button type="submit" className="btn btn-primary">
                 Salvar Relatório
               </button>
             </div>
