@@ -1,14 +1,18 @@
+// muu/backend/src/routes/doacoes_mysql.js
 import express from 'express'
+// Importar o módulo express
 const router = express.Router();
 
 // GET - Listar todas as doações
 router.get('/', async (req, res) => {
   try {
+    // Listar todas as doações ordenadas por data e hora de criação
     const executeQuery = req.app.locals.executeQuery;
+    // Consulta SQL
     const sql = 'SELECT * FROM doacoes ORDER BY data_doacao DESC, created_at DESC';
-    
+    // Executar a consulta SQL
     const rows = await executeQuery(sql);
-    
+    //  Retornar os resultados
     res.json({
       message: 'Doações listadas com sucesso',
       data: rows
@@ -21,17 +25,21 @@ router.get('/', async (req, res) => {
 // GET - Buscar doação por ID
 router.get('/:id', async (req, res) => {
   try {
+    // Buscar doação específica pelo ID
     const executeQuery = req.app.locals.executeQuery;
+    // Consulta SQL
     const sql = 'SELECT * FROM doacoes WHERE id = ?';
+    // Parâmetros da consulta
     const params = [req.params.id];
-    
+    // Executar a consulta SQL
     const rows = await executeQuery(sql, params);
-    
+    // Verificar se a doação foi encontrada
     if (rows.length > 0) {
       res.json({
         message: 'Doação encontrada',
         data: rows[0]
       });
+      // Doação não encontrada
     } else {
       res.status(404).json({ error: 'Doação não encontrada' });
     }
@@ -43,12 +51,15 @@ router.get('/:id', async (req, res) => {
 // GET - Buscar doações por aluno responsável
 router.get('/aluno/:aluno', async (req, res) => {
   try {
+    // Buscar doações por aluno responsável
     const executeQuery = req.app.locals.executeQuery;
+    // Consulta SQL
     const sql = 'SELECT * FROM doacoes WHERE aluno_responsavel LIKE ? ORDER BY data_doacao DESC';
+    // Parâmetros da consulta
     const params = [`%${req.params.aluno}%`];
-    
+    // Executar a consulta SQL
     const rows = await executeQuery(sql, params);
-    
+    // Retornar os resultados
     res.json({
       message: 'Doações do aluno listadas com sucesso',
       data: rows
@@ -64,13 +75,14 @@ router.get('/campanha/:campanha', async (req, res) => {
     const executeQuery = req.app.locals.executeQuery;
     const sql = 'SELECT * FROM doacoes WHERE campanha LIKE ? ORDER BY data_doacao DESC';
     const params = [`%${req.params.campanha}%`];
-    
+    // Executar a consulta SQL
     const rows = await executeQuery(sql, params);
-    
+    // Retornar os resultados
     res.json({
       message: 'Doações da campanha listadas com sucesso',
       data: rows
     });
+    // Tratamento de erros
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -103,7 +115,7 @@ router.get('/stats/resumo', async (req, res) => {
       ORDER BY total_pontos DESC 
       LIMIT 10
     `);
-    
+    // Retornar as estatísticas
     res.json({
       message: 'Estatísticas de doações',
       data: {
@@ -126,13 +138,13 @@ router.post('/', async (req, res) => {
     if (!data_doacao || !aluno_responsavel || !item_doacao || !quantidade || !pontuacao) {
       return res.status(400).json({ error: 'Data, aluno responsável, item, quantidade e pontuação são obrigatórios' });
     }
-
+    // Inserir nova doação no banco de dados
     const executeQuery = req.app.locals.executeQuery;
     const sql = 'INSERT INTO doacoes (data_doacao, aluno_responsavel, item_doacao, quantidade, campanha, doador, pontuacao) VALUES (?, ?, ?, ?, ?, ?, ?)';
     const params = [data_doacao, aluno_responsavel, item_doacao, quantidade, campanha, doador, pontuacao];
-    
+    // Executar a consulta SQL,
     const result = await executeQuery(sql, params);
-    
+    // Retornar a resposta de sucesso
     res.status(201).json({
       message: 'Doação criada com sucesso',
       data: {
@@ -155,7 +167,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { data_doacao, aluno_responsavel, item_doacao, quantidade, campanha, doador, pontuacao } = req.body;
-    
+    // Validar campos obrigatórios
     if (!data_doacao || !aluno_responsavel || !item_doacao || !quantidade || !pontuacao) {
       return res.status(400).json({ error: 'Data, aluno responsável, item, quantidade e pontuação são obrigatórios' });
     }
@@ -163,9 +175,9 @@ router.put('/:id', async (req, res) => {
     const executeQuery = req.app.locals.executeQuery;
     const sql = 'UPDATE doacoes SET data_doacao = ?, aluno_responsavel = ?, item_doacao = ?, quantidade = ?, campanha = ?, doador = ?, pontuacao = ? WHERE id = ?';
     const params = [data_doacao, aluno_responsavel, item_doacao, quantidade, campanha, doador, pontuacao, req.params.id];
-    
+    // Executar a consulta SQL
     const result = await executeQuery(sql, params);
-    
+    // Verificar se a doação foi encontrada e atualizada
     if (result.affectedRows === 0) {
       res.status(404).json({ error: 'Doação não encontrada' });
     } else {
