@@ -1,6 +1,45 @@
 import { useState } from 'react'
 
+// 🔒 Controle de acesso por tipo de usuário (Copiado de App.jsx)
+const ACCESS_MAP = {
+  administrador: [
+    'dashboard', 'edicoes', 'participantes', 'equipes', 'atividades',
+    'relatorios', 'monitoramento', 'doacoes', 'metas', 'perfil', 'graficos'
+  ],
+  professor: [
+    'dashboard', 'participantes', 'equipes', 'atividades',
+    'relatorios', 'monitoramento', 'perfil', 'graficos'
+  ],
+  mentor: [
+    'dashboard', 'participantes', 'equipes', 'atividades', 'perfil', 'relatorios'
+  ],
+  aluno: [
+    'dashboard', 'doacoes', 'perfil', 'relatorios'
+  ]
+}
+
+// Mapeamento de seção para texto de exibição
+const SECTION_TITLES = {
+  dashboard: 'Dashboard',
+  edicoes: 'Edições',
+  participantes: 'Participantes',
+  equipes: 'Equipes',
+  atividades: 'Atividades',
+  relatorios: 'Relatórios',
+  monitoramento: 'Monitoramento',
+  doacoes: 'Doações',
+  metas: 'Metas',
+  perfil: 'Perfil',
+  graficos: 'Gráficos'
+}
+
 function Header({ user, onLogin, onLogout, onNavigate, currentSection }) {
+  // 🔐 Filtra as seções permitidas para o usuário logado
+  const getSections = () => {
+    if (!user) return []
+    const allowedSections = ACCESS_MAP[user.tipo] || []
+    return allowedSections.filter(section => section !== 'perfil') // Perfil é acessado pelo dropdown
+  }
   const [showMenu, setShowMenu] = useState(false)
 
   const handleProfileClick = () => {
@@ -30,16 +69,16 @@ function Header({ user, onLogin, onLogout, onNavigate, currentSection }) {
         {/* Navegação principal */}
         <nav className="nav">
           <ul id="navMenu">
-            <li><a className={currentSection === 'dashboard' ? 'active' : ''} onClick={() => onNavigate('dashboard')}>Dashboard</a></li>
-            <li><a className={currentSection === 'edicoes' ? 'active' : ''} onClick={() => onNavigate('edicoes')}>Edições</a></li>
-            <li><a className={currentSection === 'participantes' ? 'active' : ''} onClick={() => onNavigate('participantes')}>Participantes</a></li>
-            <li><a className={currentSection === 'equipes' ? 'active' : ''} onClick={() => onNavigate('equipes')}>Equipes</a></li>
-            <li><a className={currentSection === 'atividades' ? 'active' : ''} onClick={() => onNavigate('atividades')}>Atividades</a></li>
-            <li><a className={currentSection === 'relatorios' ? 'active' : ''} onClick={() => onNavigate('relatorios')}>Relatórios</a></li>
-            <li><a className={currentSection === 'monitoramento' ? 'active' : ''} onClick={() => onNavigate('monitoramento')}>Monitoramento</a></li>
-            <li><a className={currentSection === 'doacoes' ? 'active' : ''} onClick={() => onNavigate('doacoes')}>Doações</a></li>
-            <li><a className={currentSection === 'metas' ? 'active' : ''} onClick={() => onNavigate('metas')}>Metas</a></li>
-            <li><a className={currentSection === 'graficos' ? 'active' : ''} onClick={() => onNavigate('graficos')}>Gráficos</a></li>
+            {getSections().map(section => (
+              <li key={section}>
+                <a
+                  className={currentSection === section ? 'active' : ''}
+                  onClick={() => onNavigate(section)}
+                >
+                  {SECTION_TITLES[section]}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
 

@@ -1,87 +1,108 @@
+import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 
-function ModalVerRelatorio({ show, onClose, relatorio, equipes = [], participantes = [], pontosDoRelatorio = () => 0 }) {
-  if (!show || !relatorio) return null
+function ModalRelatorioEquipe({ show, onClose, onSubmit, equipes = [] }) {
+  const [formData, setFormData] = useState({
+    nomeEquipe: '',
+    resumo: '',
+    resultados: '',
+    quantidade: '',
+    imagem: null,
+  })
 
-  // parse dados_json com segurança
-  let dados = {}
-  try { dados = typeof relatorio.dados_json === 'string' ? JSON.parse(relatorio.dados_json) : (relatorio.dados_json || {}) } catch (e) { dados = {} }
+  if (!show) return null
 
-  const equipeName = (() => {
-    if (relatorio.equipe_id) {
-      const eq = equipes.find(e => String(e.id) === String(relatorio.equipe_id))
-      if (eq) return eq.nome
-    }
-    return relatorio.titulo || '—'
-  })()
+  const handleChange = (e) => {
+    const { name, value, files } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: files ? files[0] : value
+    }))
+  }
 
-  const pontos = pontosDoRelatorio(relatorio)
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    onSubmit(formData)
+  }
 
   return ReactDOM.createPortal(
     <div className="modal active" style={{ zIndex: 4000 }}>
-      <div className="modal-content" style={{ maxWidth: 720, maxHeight: '90vh', overflowY: 'auto' }}>
+      <div className="modal-content" style={{ maxWidth: 600 }}>
         <div className="modal-header">
-          <h2>Visualizar Relatório</h2>
+          <h2>Criar Relatório de Equipe</h2>
           <span className="close" onClick={onClose} style={{ cursor: 'pointer' }}>&times;</span>
         </div>
 
-        <div style={{ padding: '1.6rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-            <div style={{ fontWeight: 700, fontSize: '1.05rem' }}>{relatorio.titulo}</div>
-            <div style={{ color: '#666' }}>· {relatorio.tipo}</div>
-            <div style={{ marginLeft: 'auto', color: '#333' }}>{new Date(relatorio.created_at || relatorio.createdAt || Date.now()).toLocaleString('pt-BR')}</div>
+        <form onSubmit={handleSubmit} style={{ padding: '1.5rem' }}>
+          {/* Nome da Equipe (select puxando do banco) */}
+          <div className="form-group" style={{ marginBottom: '1rem' }}>
+            <label>Equipe</label>
+            <select
+              name="nomeEquipe"
+              value={formData.nomeEquipe}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Selecione uma equipe</option>
+              {equipes.map(eq => (
+                <option key={eq.id} value={eq.nome}>{eq.nome}</option>
+              ))}
+            </select>
           </div>
 
-          <div style={{ marginBottom: '0.8rem' }}>
-            <strong>Equipe:</strong> {equipeName}
+          {/* Resumo */}
+          <div className="form-group" style={{ marginBottom: '1rem' }}>
+            <label>Resumo</label>
+            <textarea
+              name="resumo"
+              value={formData.resumo}
+              onChange={handleChange}
+              placeholder="Descreva o resumo do relatório..."
+              rows={3}
+            ></textarea>
           </div>
 
-          <div style={{ marginBottom: '0.8rem' }}>
-            <strong>Gerado por:</strong> {relatorio.gerado_por || '—'}
+          {/* Resultados */}
+          <div className="form-group" style={{ marginBottom: '1rem' }}>
+            <label>Resultados</label>
+            <textarea
+              name="resultados"
+              value={formData.resultados}
+              onChange={handleChange}
+              placeholder="Descreva os resultados alcançados..."
+              rows={3}
+            ></textarea>
           </div>
 
-          <div style={{ marginBottom: '0.8rem' }}>
-            <strong>Pontos calculados:</strong> {pontos}
+          {/* Quantidade */}
+          <div className="form-group" style={{ marginBottom: '1rem' }}>
+            <label>Quantidade / Valor do Impacto</label>
+            <input
+              type="number"
+              name="quantidade"
+              value={formData.quantidade}
+              onChange={handleChange}
+              placeholder="Exemplo: 50 (kg), 200 (R$), 10 (ações)"
+              min="0"
+              step="any"
+            />
           </div>
 
-          <hr style={{ margin: '1rem 0' }} />
-
-          <div style={{ marginBottom: '1rem' }}>
-            <strong>Resumo</strong>
-            <p style={{ whiteSpace: 'pre-wrap' }}>{dados.resumo || '—'}</p>
+          {/* Imagem */}
+          <div className="form-group" style={{ marginBottom: '1rem' }}>
+            <label>Imagem (opcional)</label>
+            <input type="file" name="imagem" accept="image/*" onChange={handleChange} />
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <strong>Resultados</strong>
-            <p style={{ whiteSpace: 'pre-wrap' }}>{dados.resultados || '—'}</p>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+            <button type="button" className="btn btn-outline" onClick={onClose} style={{ marginRight: '1rem' }}>Cancelar</button>
+            <button type="submit" className="btn btn-primary">Salvar Relatório</button>
           </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <strong>Tipo de impacto:</strong> {dados.tipoImpacto || dados.tipo || '—'}
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <strong>Quantidade / Impacto:</strong> {dados.quantidade ?? dados.impacto ?? '—'}
-          </div>
-
-          {/* imagem/arquivo se existir */}
-          {relatorio.arquivo_path || dados.imagem || dados.fileUrl ? (
-            <div style={{ marginTop: '1rem' }}>
-              <strong>Arquivo / Imagem</strong>
-              <div style={{ marginTop: '0.6rem' }}>
-                <img src={relatorio.arquivo_path || dados.imagem || dados.fileUrl} alt="anexo" style={{ maxWidth: '100%', borderRadius: 8 }} />
-              </div>
-            </div>
-          ) : null}
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.4rem' }}>
-            <button className="btn btn-outline" onClick={onClose}>Fechar</button>
-          </div>
-        </div>
+        </form>
       </div>
     </div>,
     document.body
   )
 }
 
-export default ModalVerRelatorio
+export default ModalRelatorioEquipe

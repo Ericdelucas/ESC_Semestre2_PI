@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react'
 import StudentInput from './Monitoring/StudentInput'
 import axios from 'axios'
 
-function Doacoes({ active, participantes = [], equipes: equipesProp = [], doacoes = [], onDoacoesChange, userType, edicoes: edicoesProp = [] }) {
+function Doacoes({ active, participantes = [], equipes: equipesProp = [], doacoes = [], onDoacoesChange, userType }) {
   const [showModal, setShowModal] = useState(false)
   const [equipes, setEquipes] = useState(equipesProp || [])
-  const [edicoes, setEdicoes] = useState(edicoesProp || [])
 
   const [novaDoacao, setNovaDoacao] = useState({
     data_doacao: '',
@@ -14,26 +13,24 @@ function Doacoes({ active, participantes = [], equipes: equipesProp = [], doacoe
     quantidade: '',
     campanha: '',
     doador: '',
-    pontuacao: 0
+    pontuacao: 0,
+    equipe_id: '' // 🔹 adiciona o campo de equipe
   })
 
-  // 🔹 Buscar equipes e edições do backend caso não venham por props
+  // 🔹 Buscar equipes do backend caso não venham por props
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchEquipes = async () => {
       try {
         if (!equipesProp?.length) {
           const eqRes = await axios.get('http://localhost:3001/api/equipes')
-          setEquipes(Array.isArray(eqRes.data) ? eqRes.data : (eqRes.data?.data || []))
-        }
-        if (!edicoesProp?.length) {
-          const edRes = await axios.get('http://localhost:3001/api/edicoes')
-          setEdicoes(Array.isArray(edRes.data) ? edRes.data : (edRes.data?.data || []))
+          const lista = Array.isArray(eqRes.data) ? eqRes.data : (eqRes.data?.data || [])
+          setEquipes(lista)
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar equipes ou edições:', error)
+        console.error('❌ Erro ao carregar equipes:', error)
       }
     }
-    fetchData()
+    fetchEquipes()
   }, [])
 
   const handleAddDonation = (novaDonacao) => {
@@ -41,8 +38,14 @@ function Doacoes({ active, participantes = [], equipes: equipesProp = [], doacoe
     if (onDoacoesChange) onDoacoesChange(novasDoacoes)
   }
 
+  // 🔹 Enviar doação para o backend
   const handleSalvarDoacao = async () => {
     try {
+      if (!novaDoacao.equipe_id) {
+        alert('Por favor, selecione uma equipe antes de salvar.')
+        return
+      }
+
       const response = await fetch('http://localhost:3001/api/doacoes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -53,14 +56,14 @@ function Doacoes({ active, participantes = [], equipes: equipesProp = [], doacoe
       const data = await response.json()
       handleAddDonation(data.data)
       setShowModal(false)
-      alert('✅ Doação registrada com sucesso!')
+      alert('✅ Doação registrada com sucesso e pontos atualizados na equipe!')
     } catch (error) {
       console.error(error)
       alert('❌ Erro ao registrar a doação.')
     }
   }
 
-  // 🔹 Exportar dados em JSON
+  // 🔹 Exportar dados
   const handleExportarDados = () => {
     const dados = {
       timestamp: new Date().toISOString(),
@@ -71,8 +74,8 @@ function Doacoes({ active, participantes = [], equipes: equipesProp = [], doacoe
     }
 
     const dataStr = JSON.stringify(dados, null, 2)
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
+    const blob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
     link.download = `doacoes_${new Date().toISOString().split('T')[0]}.json`
@@ -87,7 +90,7 @@ function Doacoes({ active, participantes = [], equipes: equipesProp = [], doacoe
 
   // 🔹 Estatísticas básicas
   const totalDoacoes = doacoes.length
-  const totalPontos = doacoes.reduce((total, d) => total + d.pontuacao, 0)
+  const totalPontos = doacoes.reduce((total, d) => total + (d.pontuacao || 0), 0)
   const totalQuantidade = doacoes.reduce((total, d) => total + Number(d.quantidade || 0), 0)
   const alunosAtivos = [...new Set(doacoes.map(d => d.aluno_responsavel))].length
 
@@ -143,44 +146,29 @@ function Doacoes({ active, participantes = [], equipes: equipesProp = [], doacoe
                 </div>
               </div>
             </div>
-
-            {/* Ranking de itens doados */}
-            <div className="donations-ranking">
-              <h3><i className="fas fa-trophy"></i> Ranking de Itens Mais Doados</h3>
-              <div className="ranking-grid">
-                {doacoes.length === 0 ? (
-                  <div className="no-data">
-                    <i className="fas fa-info-circle"></i>
-                    <p>Nenhuma doação registrada ainda.</p>
-                  </div>
-                ) : (() => {
-                  const contagem = {}
-                  doacoes.forEach(d => contagem[d.item_doacao] = (contagem[d.item_doacao] || 0) + 1)
-                  const top = Object.entries(contagem).sort(([, a], [, b]) => b - a).slice(0, 3)
-                  const pos = ['gold', 'silver', 'bronze']
-                  const posNum = ['1º', '2º', '3º']
-                  return top.map(([item, qtd], i) => (
-                    <div key={item} className={`ranking-item ${pos[i]}`}>
-                      <div className="ranking-position">{posNum[i]}</div>
-                      <div className="ranking-info">
-                        <h4>{item}</h4>
-                        <p>{qtd} doações</p>
-                      </div>
-                    </div>
-                  ))
-                })()}
-              </div>
-            </div>
           </>
         )}
 
         {/* Formulário de Doação */}
+        <div style={{ marginTop: '2rem' }}>
+          <label><strong>Selecione a Equipe:</strong></label>
+          <select
+            value={novaDoacao.equipe_id}
+            onChange={(e) => setNovaDoacao({ ...novaDoacao, equipe_id: e.target.value })}
+            style={{ padding: '0.5rem', marginBottom: '1rem' }}
+          >
+            <option value="">-- Escolher equipe --</option>
+            {equipes.map(eq => (
+              <option key={eq.id} value={eq.id}>{eq.nome}</option>
+            ))}
+          </select>
+        </div>
+
         <StudentInput
           onAddDonation={handleAddDonation}
           participantes={participantes}
           equipes={equipes}
           doacoes={doacoes}
-          edicoes={edicoes}
           showModal={showModal}
           setShowModal={setShowModal}
           novaDoacao={novaDoacao}
@@ -203,7 +191,7 @@ function Doacoes({ active, participantes = [], equipes: equipesProp = [], doacoe
                   <i className="fas fa-info-circle"></i>
                   <div className="alert-content">
                     <h4>Sistema Ativo</h4>
-                    <p>Total de {totalDoacoes} doações registradas com {totalPontos} pontos acumulados.</p>
+                    <p>Total de {totalDoacoes} doações com {totalPontos} pontos acumulados.</p>
                     <small>Atualizado agora</small>
                   </div>
                 </div>

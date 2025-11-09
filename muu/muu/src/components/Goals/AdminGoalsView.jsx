@@ -341,7 +341,7 @@ function AdminGoalsView() {
               <div className="team-name">{meta.nomeEquipe}</div>
               <div>
                 <span className={`status-badge ${getStatusClass(meta.status)}`}>
-                  {meta.status.replace('_', ' ')}
+                  {meta.status.replace(/_/g, ' ')}
                 </span>
               </div>
               <div className="progress-cell">
@@ -397,4 +397,3 @@ function AdminGoalsView() {
 }
 
 export default AdminGoalsView
-

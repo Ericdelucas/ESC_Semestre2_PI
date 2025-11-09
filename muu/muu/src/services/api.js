@@ -1,6 +1,9 @@
+// 📦 Dependências
 import axios from 'axios';
 
-// Configuração base da API
+// ============================
+// 🔧 CONFIGURAÇÃO BASE DA API
+// ============================
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const api = axios.create({
@@ -11,33 +14,32 @@ const api = axios.create({
   timeout: 10000, // 10 segundos de timeout
 });
 
-// Interceptor para tratamento de erros
+// ============================
+// ⚠️ INTERCEPTOR DE ERROS
+// ============================
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('Erro na API:', error);
-    
-    // Tratamento específico para diferentes tipos de erro
+    console.error('🚨 Erro na API:', error);
+
     if (error.response) {
-      // Erro de resposta do servidor
       console.error('Status:', error.response.status);
       console.error('Data:', error.response.data);
     } else if (error.request) {
-      // Erro de rede
       console.error('Erro de rede:', error.request);
     } else {
-      // Erro de configuração
       console.error('Erro de configuração:', error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );
 
-// Log da URL da API para debug
-console.log('API Base URL:', API_BASE_URL);
+console.log('🌐 API Base URL:', API_BASE_URL);
 
-// Serviços para Edições
+// ============================
+// 🧩 SERVIÇOS - EDIÇÕES
+// ============================
 export const edicoesService = {
   getAll: () => api.get('/edicoes'),
   getById: (id) => api.get(`/edicoes/${id}`),
@@ -46,7 +48,9 @@ export const edicoesService = {
   delete: (id) => api.delete(`/edicoes/${id}`),
 };
 
-// Serviços para Participantes
+// ============================
+// 👥 SERVIÇOS - PARTICIPANTES
+// ============================
 export const participantesService = {
   getAll: () => api.get('/participantes'),
   getById: (id) => api.get(`/participantes/${id}`),
@@ -56,7 +60,9 @@ export const participantesService = {
   delete: (id) => api.delete(`/participantes/${id}`),
 };
 
-// Serviços para Equipes
+// ============================
+// 🧑‍🤝‍🧑 SERVIÇOS - EQUIPES
+// ============================
 export const equipesService = {
   getAll: () => api.get('/equipes'),
   getById: (id) => api.get(`/equipes/${id}`),
@@ -66,7 +72,9 @@ export const equipesService = {
   delete: (id) => api.delete(`/equipes/${id}`),
 };
 
-// Serviços para Atividades
+// ============================
+// 🧾 SERVIÇOS - ATIVIDADES
+// ============================
 export const atividadesService = {
   getAll: () => api.get('/atividades'),
   getById: (id) => api.get(`/atividades/${id}`),
@@ -74,24 +82,27 @@ export const atividadesService = {
   getByTipo: (tipo) => api.get(`/atividades/tipo/${tipo}`),
   create: (data) => api.post('/atividades', data),
   update: (id, data) => api.put(`/atividades/${id}`, data),
-  updateValor: (id, valor) => api.patch(`/atividades/${id}/valor`, { valor_arrecadado: valor }),
+  updateValor: (id, valor) =>
+    api.patch(`/atividades/${id}/valor`, { valor_arrecadado: valor }),
   delete: (id) => api.delete(`/atividades/${id}`),
 };
 
-// Serviços para Doações
+// ============================
+// 🎁 SERVIÇOS - DOAÇÕES (atualizado)
+// ============================
 export const doacoesService = {
   getAll: () => api.get('/doacoes'),
   getById: (id) => api.get(`/doacoes/${id}`),
-  getByAluno: (aluno) => api.get(`/doacoes/aluno/${aluno}`),
-  getByItem: (item) => api.get(`/doacoes/item/${item}`),
-  getByPeriodo: (inicio, fim) => api.get(`/doacoes/periodo/${inicio}/${fim}`),
-  getStats: () => api.get('/doacoes/stats/geral'),
+  getByEquipe: (id) => api.get(`/doacoes/equipe/${id}`),
+  getStats: () => api.get('/doacoes/stats/resumo'),
   create: (data) => api.post('/doacoes', data),
   update: (id, data) => api.put(`/doacoes/${id}`, data),
   delete: (id) => api.delete(`/doacoes/${id}`),
 };
 
-// Serviços para Metas
+// ============================
+// 🎯 SERVIÇOS - METAS
+// ============================
 export const metasService = {
   getAll: () => api.get('/metas'),
   getById: (id) => api.get(`/metas/${id}`),
@@ -101,15 +112,28 @@ export const metasService = {
   getStats: () => api.get('/metas/stats/geral'),
   create: (data) => api.post('/metas', data),
   update: (id, data) => api.put(`/metas/${id}`, data),
-  updateStatus: (id, status) => api.patch(`/metas/${id}/status`, { status }),
+  updateStatus: (id, status) =>
+    api.patch(`/metas/${id}/status`, { status }),
   delete: (id) => api.delete(`/metas/${id}`),
 };
 
-// Serviço de teste
+// ============================
+// 📊 SERVIÇOS - RELATÓRIOS / GRÁFICOS
+// ============================
+export const relatoriosService = {
+  getResumoDoacoes: () => api.get('/doacoes/stats/resumo'),
+  getResumoMetas: () => api.get('/metas/stats/geral'),
+};
+
+// ============================
+// 🧪 SERVIÇO DE TESTE
+// ============================
 export const testService = {
   test: () => api.get('/test'),
   info: () => api.get('/'),
 };
 
+// ============================
+// 🚀 EXPORT DEFAULT
+// ============================
 export default api;
-

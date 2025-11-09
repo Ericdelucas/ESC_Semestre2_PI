@@ -2,32 +2,32 @@ import { useState, useEffect } from 'react'
 
 function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes = [] }) {
   const [formData, setFormData] = useState({
-    dataDoacao: new Date().toISOString().split('T')[0],
     alunoResponsavel: '',
+    equipe_id: '',
     itemDoacao: '',
     campanha: '',
     doador: '',
     quantidade: '',
-    pontuacao: 0,
-    edicao: ''
+    pontuacao: 0
   })
 
   const [showModal, setShowModal] = useState(false)
   const [alunos, setAlunos] = useState([])
-  const [edicoes, setEdicoes] = useState([])
+  const [equipesList, setEquipesList] = useState([])
 
-  // 🧠 Carregar alunos e edições do backend
+  // 🔹 Buscar alunos e equipes do backend
   useEffect(() => {
     const carregarDados = async () => {
       try {
-        const [alunosRes, edicoesRes] = await Promise.all([
+        const [alunosRes, equipesRes] = await Promise.all([
           fetch('http://localhost:3001/api/participantes'),
-          fetch('http://localhost:3001/api/edicoes')
+          fetch('http://localhost:3001/api/equipes')
         ])
 
         const alunosData = await alunosRes.json()
-        const edicoesData = await edicoesRes.json()
+        const equipesData = await equipesRes.json()
 
+        // Filtra apenas alunos
         if (alunosData.data && Array.isArray(alunosData.data)) {
           const apenasAlunos = alunosData.data.filter(
             (p) => p.tipo?.toLowerCase() === 'aluno'
@@ -35,17 +35,21 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
           setAlunos(apenasAlunos)
         }
 
-        if (edicoesData.data && Array.isArray(edicoesData.data)) {
-          setEdicoes(edicoesData.data)
+        // Define equipes do backend
+        if (Array.isArray(equipesData)) {
+          setEquipesList(equipesData)
+        } else if (Array.isArray(equipesData.data)) {
+          setEquipesList(equipesData.data)
         }
       } catch (error) {
-        console.error('Erro ao carregar alunos/edições:', error)
+        console.error('❌ Erro ao carregar alunos/equipes:', error)
       }
     }
 
     carregarDados()
   }, [])
 
+  // 🔹 Itens de doação e pontos
   const itensDoacao = [
     { nome: 'Arroz', pontos: 1 },
     { nome: 'Feijão', pontos: 2 },
@@ -59,7 +63,6 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
   ]
 
   const campanhas = ['Rifa - Camisa time...', 'Caixa FECAP', 'Campanha Natal', 'Ação Solidária']
-  const tiposDoador = ['Professor', 'Aluno FECAP', 'Funcionário', 'Comunidade Externa']
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -76,7 +79,7 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!formData.alunoResponsavel || !formData.itemDoacao || !formData.quantidade || !formData.edicao) {
+    if (!formData.alunoResponsavel || !formData.itemDoacao || !formData.quantidade || !formData.equipe_id) {
       alert('⚠️ Por favor, preencha todos os campos obrigatórios.')
       return
     }
@@ -94,14 +97,13 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
       if (onAddDonation) onAddDonation(data.data || formData)
 
       setFormData({
-        dataDoacao: new Date().toISOString().split('T')[0],
         alunoResponsavel: '',
+        equipe_id: '',
         itemDoacao: '',
         campanha: '',
         doador: '',
         quantidade: '',
-        pontuacao: 0,
-        edicao: ''
+        pontuacao: 0
       })
 
       setShowModal(false)
@@ -127,8 +129,8 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
           <table>
             <thead>
               <tr>
-                <th>Data</th>
                 <th>Aluno</th>
+                <th>Equipe</th>
                 <th>Item</th>
                 <th>Campanha</th>
                 <th>Doador</th>
@@ -146,8 +148,8 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
               ) : (
                 doacoes.slice(0, 10).map((d, i) => (
                   <tr key={i}>
-                    <td>{new Date(d.dataDoacao).toLocaleDateString('pt-BR')}</td>
                     <td>{d.alunoResponsavel}</td>
+                    <td>{d.equipeNome || d.equipe_id}</td>
                     <td>{d.itemDoacao}</td>
                     <td>{d.campanha}</td>
                     <td>{d.doador}</td>
@@ -170,10 +172,7 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Data *</label>
-                <input type="date" name="dataDoacao" value={formData.dataDoacao} onChange={handleInputChange} required />
-              </div>
+              {/* ❌ Campo de Data REMOVIDO */}
 
               <div className="form-group">
                 <label>Aluno *</label>
@@ -183,11 +182,14 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
                 </select>
               </div>
 
+              {/* 🔁 Edição → Equipe */}
               <div className="form-group">
-                <label>Edição *</label>
-                <select name="edicao" value={formData.edicao} onChange={handleInputChange} required>
-                  <option value="">Selecione a edição</option>
-                  {edicoes.map(e => <option key={e.id} value={e.nome}>{e.nome}</option>)}
+                <label>Equipe *</label>
+                <select name="equipe_id" value={formData.equipe_id} onChange={handleInputChange} required>
+                  <option value="">Selecione a equipe</option>
+                  {equipesList.map(eq => (
+                    <option key={eq.id} value={eq.id}>{eq.nome}</option>
+                  ))}
                 </select>
               </div>
 
@@ -195,7 +197,9 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
                 <label>Item *</label>
                 <select name="itemDoacao" value={formData.itemDoacao} onChange={handleInputChange} required>
                   <option value="">Selecione</option>
-                  {itensDoacao.map(i => <option key={i.nome} value={i.nome}>{i.nome} ({i.pontos} pts)</option>)}
+                  {itensDoacao.map(i => (
+                    <option key={i.nome} value={i.nome}>{i.nome} ({i.pontos} pts)</option>
+                  ))}
                 </select>
               </div>
 
@@ -206,7 +210,9 @@ function StudentInput({ onAddDonation, participantes = [], equipes = [], doacoes
 
               <div className="form-group">
                 <label>Pontuação Calculada</label>
-                <div className="pontuacao-display"><i className="fas fa-star"></i> {formData.pontuacao} pontos</div>
+                <div className="pontuacao-display">
+                  <i className="fas fa-star"></i> {formData.pontuacao} pontos
+                </div>
               </div>
 
               <div className="form-actions">

@@ -1,171 +1,193 @@
-import express from 'express'
+import express from 'express';
 const router = express.Router();
 
-// GET - Listar todas as atividades
+// ✅ LISTAR TODAS AS ATIVIDADES (com nome da equipe)
 router.get('/', async (req, res) => {
   try {
     const executeQuery = req.app.locals.executeQuery;
     const sql = `
-      SELECT a.*, e.nome as equipe_nome 
-      FROM atividades a 
-      LEFT JOIN equipes e ON a.equipe_id = e.id 
+      SELECT 
+        a.*, 
+        e.nome AS equipe_nome
+      FROM atividades a
+      LEFT JOIN equipes e ON a.equipe_id = e.id
       ORDER BY a.created_at DESC
     `;
-    
     const rows = await executeQuery(sql);
-    
+
     res.json({
-      message: 'Atividades listadas com sucesso',
+      message: '✅ Atividades listadas com sucesso',
       data: rows
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('❌ Erro no GET /atividades:', error);
+    res.status(500).json({ error: 'Erro ao buscar atividades' });
   }
 });
 
-// GET - Buscar atividade por ID
+// ✅ BUSCAR UMA ATIVIDADE POR ID
 router.get('/:id', async (req, res) => {
   try {
     const executeQuery = req.app.locals.executeQuery;
     const sql = `
-      SELECT a.*, e.nome as equipe_nome 
-      FROM atividades a 
-      LEFT JOIN equipes e ON a.equipe_id = e.id 
+      SELECT 
+        a.*, 
+        e.nome AS equipe_nome
+      FROM atividades a
+      LEFT JOIN equipes e ON a.equipe_id = e.id
       WHERE a.id = ?
     `;
-    const params = [req.params.id];
-    
-    const rows = await executeQuery(sql, params);
-    
-    if (rows.length > 0) {
-      res.json({
-        message: 'Atividade encontrada',
-        data: rows[0]
-      });
-    } else {
-      res.status(404).json({ error: 'Atividade não encontrada' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    const rows = await executeQuery(sql, [req.params.id]);
 
-// GET - Buscar atividades por equipe
-router.get('/equipe/:equipeId', async (req, res) => {
-  try {
-    const executeQuery = req.app.locals.executeQuery;
-    const sql = `
-      SELECT a.*, e.nome as equipe_nome 
-      FROM atividades a 
-      LEFT JOIN equipes e ON a.equipe_id = e.id 
-      WHERE a.equipe_id = ?
-      ORDER BY a.created_at DESC
-    `;
-    const params = [req.params.equipeId];
-    
-    const rows = await executeQuery(sql, params);
-    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Atividade não encontrada' });
+    }
+
     res.json({
-      message: 'Atividades da equipe listadas com sucesso',
-      data: rows
+      message: '✅ Atividade encontrada',
+      data: rows[0]
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('❌ Erro no GET /atividades/:id:', error);
+    res.status(500).json({ error: 'Erro ao buscar atividade' });
   }
 });
 
-// POST - Criar nova atividade
+// ✅ CRIAR UMA NOVA ATIVIDADE
 router.post('/', async (req, res) => {
   try {
-    const { nome, tipo, descricao, equipe_id, meta_financeira, valor_arrecadado, status } = req.body;
-    
+    const {
+      nome,
+      tipo,
+      descricao,
+      equipe_id,
+      equipeId,
+      meta_pontos,
+      pontos_arrecadados,
+      status
+    } = req.body;
+
     if (!nome || !tipo) {
       return res.status(400).json({ error: 'Nome e tipo são obrigatórios' });
     }
 
+    const equipeFinalId = equipe_id || equipeId || null;
+
     const executeQuery = req.app.locals.executeQuery;
-    const sql = 'INSERT INTO atividades (nome, tipo, descricao, equipe_id, meta_financeira, valor_arrecadado, status) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    const params = [nome, tipo, descricao, equipe_id, meta_financeira || 0, valor_arrecadado || 0, status || 'Pendente'];
-    
+    const sql = `
+      INSERT INTO atividades 
+      (nome, tipo, descricao, equipe_id, meta_pontos, pontos_arrecadados, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+    `;
+    const params = [
+      nome,
+      tipo,
+      descricao || '',
+      equipeFinalId,
+      meta_pontos || 0,
+      pontos_arrecadados || 0,
+      status || 'Pendente'
+    ];
+
     const result = await executeQuery(sql, params);
-    
+
     res.status(201).json({
-      message: 'Atividade criada com sucesso',
+      message: '✅ Atividade criada com sucesso!',
       data: {
         id: result.insertId,
         nome,
         tipo,
         descricao,
-        equipe_id,
-        meta_financeira: meta_financeira || 0,
-        valor_arrecadado: valor_arrecadado || 0,
-        status: status || 'Pendente'
+        equipe_id: equipeFinalId,
+        meta_pontos,
+        pontos_arrecadados,
+        status
       }
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('❌ Erro no POST /atividades:', error);
+    res.status(500).json({ error: 'Erro ao criar atividade' });
   }
 });
 
-// PUT - Atualizar atividade
+// ✅ ATUALIZAR UMA ATIVIDADE
 router.put('/:id', async (req, res) => {
   try {
-    const { nome, tipo, descricao, equipe_id, meta_financeira, valor_arrecadado, status } = req.body;
-    
+    const {
+      nome,
+      tipo,
+      descricao,
+      equipe_id,
+      equipeId,
+      meta_pontos,
+      pontos_arrecadados,
+      status
+    } = req.body;
+
     if (!nome || !tipo) {
       return res.status(400).json({ error: 'Nome e tipo são obrigatórios' });
     }
 
+    const equipeFinalId = equipe_id || equipeId || null;
+
     const executeQuery = req.app.locals.executeQuery;
-    const sql = 'UPDATE atividades SET nome = ?, tipo = ?, descricao = ?, equipe_id = ?, meta_financeira = ?, valor_arrecadado = ?, status = ? WHERE id = ?';
-    const params = [nome, tipo, descricao, equipe_id, meta_financeira || 0, valor_arrecadado || 0, status || 'Pendente', req.params.id];
-    
+    const sql = `
+      UPDATE atividades
+      SET nome = ?, tipo = ?, descricao = ?, equipe_id = ?, meta_pontos = ?, pontos_arrecadados = ?, status = ?
+      WHERE id = ?
+    `;
+    const params = [
+      nome,
+      tipo,
+      descricao || '',
+      equipeFinalId,
+      meta_pontos || 0,
+      pontos_arrecadados || 0,
+      status || 'Pendente',
+      req.params.id
+    ];
+
     const result = await executeQuery(sql, params);
-    
+
     if (result.affectedRows === 0) {
-      res.status(404).json({ error: 'Atividade não encontrada' });
-    } else {
-      res.json({
-        message: 'Atividade atualizada com sucesso',
-        data: {
-          id: req.params.id,
-          nome,
-          tipo,
-          descricao,
-          equipe_id,
-          meta_financeira: meta_financeira || 0,
-          valor_arrecadado: valor_arrecadado || 0,
-          status: status || 'Pendente'
-        }
-      });
+      return res.status(404).json({ error: 'Atividade não encontrada' });
     }
+
+    res.json({
+      message: '✅ Atividade atualizada com sucesso!',
+      data: {
+        id: req.params.id,
+        nome,
+        tipo,
+        descricao,
+        equipe_id: equipeFinalId,
+        meta_pontos,
+        pontos_arrecadados,
+        status
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('❌ Erro no PUT /atividades/:id:', error);
+    res.status(500).json({ error: 'Erro ao atualizar atividade' });
   }
 });
 
-// DELETE - Excluir atividade
+// ✅ EXCLUIR UMA ATIVIDADE
 router.delete('/:id', async (req, res) => {
   try {
     const executeQuery = req.app.locals.executeQuery;
     const sql = 'DELETE FROM atividades WHERE id = ?';
-    const params = [req.params.id];
-    
-    const result = await executeQuery(sql, params);
-    
+    const result = await executeQuery(sql, [req.params.id]);
+
     if (result.affectedRows === 0) {
-      res.status(404).json({ error: 'Atividade não encontrada' });
-    } else {
-      res.json({
-        message: 'Atividade excluída com sucesso',
-        changes: result.affectedRows
-      });
+      return res.status(404).json({ error: 'Atividade não encontrada' });
     }
+
+    res.json({ message: '🗑️ Atividade excluída com sucesso!' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('❌ Erro no DELETE /atividades/:id:', error);
+    res.status(500).json({ error: 'Erro ao excluir atividade' });
   }
 });
 
-// module.exports = router;
-export default router
-
+export default router;
