@@ -30,10 +30,10 @@ const ACCESS_MAP = {
     'relatorios', 'monitoramento', 'perfil', 'graficos'
   ],
   mentor: [
-    'dashboard', 'participantes', 'equipes', 'atividades', 'perfil', 'graficos'
+    'dashboard', 'participantes', 'equipes', 'atividades', 'perfil', 'relatorios'
   ],
   aluno: [
-    'dashboard', 'doacoes', 'perfil', 'graficos'
+    'dashboard', 'doacoes', 'perfil','relatorios'
   ]
 }
 
