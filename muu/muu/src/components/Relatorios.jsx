@@ -1,346 +1,361 @@
-// ✅ src/components/Relatorios.jsx
+// src/components/Relatorios.jsx
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import ModalRelatorioEquipe from '../modal/ModalRelatorioEquipe'
+import ModalVerRelatorio from '../modal/ModalVerRelatorio'
 import {
   BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts'
 
-function Relatorios({ active, edicoes, participantes, equipes, atividades, metas = [], doacoes = [] }) {
-  const [reportType, setReportType] = useState('')
-  const [reportData, setReportData] = useState(null)
-  const [showResult, setShowResult] = useState(false)
+function Relatorios({ active, edicoes = [], participantes = [], equipes = [], atividades = [] }) {
+  const [reportFilter, setReportFilter] = useState('geral')
+  const [reportData, setReportData] = useState({})
+  const [showCreateReportModal, setShowCreateReportModal] = useState(false)
+  const [showViewModal, setShowViewModal] = useState(false)
+  const [selectedRelatorio, setSelectedRelatorio] = useState(null)
   const [relatorios, setRelatorios] = useState([])
   const [loading, setLoading] = useState(false)
 
-  // ============================================================
-  // ===================== INTEGRAÇÃO BACKEND ====================
-  // ============================================================
-  useEffect(() => {
-    const fetchRelatorios = async () => {
-      try {
-        setLoading(true)
-        const res = await axios.get('http://localhost:3001/api/relatorios')
-        setRelatorios(res.data)
-      } catch (error) {
-        console.error('Erro ao carregar relatórios:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchRelatorios()
-  }, [])
+  // Pontos por tipo
+  const itemPontos = {
+    arroz: 1, feijao: 2, acucar: 3, oleo: 4,
+    macarrao: 5, fuba: 6, leite: 7, outro: 8, dinheiro: 9
+  }
 
-  // ============================================================
-  // =================== CRIAÇÃO DE RELATÓRIOS ===================
-  // ============================================================
+  // --- Backend: carregar relatórios
+  useEffect(() => { fetchRelatorios() }, [])
+
+  const fetchRelatorios = async () => {
+    try {
+      setLoading(true)
+      const res = await axios.get('http://localhost:3001/api/relatorios')
+      // aceita res.data ou res.data.data
+      const list = Array.isArray(res.data) ? res.data : (res.data?.data || [])
+      setRelatorios(list)
+    } catch (error) {
+      console.error('Erro ao carregar relatórios:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // --- Cria relatório (recebe o objeto do modal)
   const handleCreateRelatorio = async (formData) => {
     try {
-      await axios.post('http://localhost:3001/api/relatorios', formData)
-      alert('✅ Relatório criado com sucesso!')
+      // Normalizar: o modal pode enviar equipe_id (numérico) ou nome (string em nomeEquipe).
+      // Aceitamos ambos: preferimos equipe_id numérico.
+      const bodyBase = {
+        titulo: formData.nomeEquipe || formData.titulo || 'Relatório de equipe',
+        tipo: 'equipe',
+        gerado_por: formData.mentor || 'Sistema',
+        dados_json: JSON.stringify({
+          resumo: formData.resumo,
+          resultados: formData.resultados,
+          tipoImpacto: formData.tipoImpacto,
+          quantidade: formData.quantidade
+        })
+      }
 
-      // Atualiza lista após criar
-      const res = await axios.get('http://localhost:3001/api/relatorios')
-      setRelatorios(res.data)
+      // se formData.equipe_id existe e é numérico, usa; se o modal só mandou nomeEquipe (nome),
+      // enviamos equipe_id vazio (o backend pode aceitar) mas armazenamos o nome em 'titulo'.
+      if (formData.equipe_id && !isNaN(parseInt(formData.equipe_id))) {
+        bodyBase.equipe_id = parseInt(formData.equipe_id)
+      } else if (formData.nomeEquipe && isNaN(Number(formData.nomeEquipe))) {
+        // enviamos titulo com nome (já setado) e não passamos equipe_id numérico
+        // Backend receberá titulo (com o nome) — o nosso código de relatório lida com isso.
+      }
+
+      if (formData.imagem instanceof File) {
+        const fd = new FormData()
+        Object.entries(bodyBase).forEach(([k, v]) => fd.append(k, v))
+        fd.append('arquivo', formData.imagem)
+        await axios.post('http://localhost:3001/api/relatorios', fd, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+      } else {
+        await axios.post('http://localhost:3001/api/relatorios', bodyBase)
+      }
+
+      alert('✅ Relatório criado com sucesso!')
+      setShowCreateReportModal(false)
+      await fetchRelatorios()
     } catch (err) {
       console.error('Erro ao criar relatório:', err)
-      alert('❌ Falha ao salvar relatório. Verifique o console.')
+      alert('❌ Falha ao salvar relatório. Veja o console.')
     }
   }
 
-  // ============================================================
-  // ============== FUNÇÕES DE GERAÇÃO DE RELATÓRIOS ============
-  // ============================================================
-  const generateReport = (type) => {
-    setReportType(type)
-    let data = {}
-
-    switch (type) {
-      case 'geral': data = generateGeralReport(); break
-      case 'periodo': data = generatePeriodoReport(); break
-      case 'equipe': data = generateEquipeReport(); break
-      case 'equipe-periodo': data = generateEquipePeriodoReport(); break
-      default: data = {}
-    }
-
-    setReportData(data)
-    setShowResult(true)
-  }
-
-  // 🔹 Relatório Geral
-  const generateGeralReport = () => {
-    const totalArrecadado = atividades.reduce((sum, a) => sum + (parseFloat(a.arrecadado) || 0), 0)
-    const totalMeta = atividades.reduce((sum, a) => sum + (parseFloat(a.meta) || 0), 0)
-    const atividadesPorTipo = atividades.reduce((acc, a) => {
-      acc[a.tipo] = (acc[a.tipo] || 0) + 1
-      return acc
-    }, {})
-
-    const totalDoacoes = doacoes.length
-    const totalPontosDoacoes = doacoes.reduce((sum, d) => sum + (d.pontuacao || 0), 0)
-    const totalQuantidadeDoacoes = doacoes.reduce((sum, d) => sum + (parseFloat(d.quantidade) || 0), 0)
-
-    const totalMetas = metas.length
-    const metasConcluidas = metas.filter(m => m.status === 'concluida').length
-    const metasEmAndamento = metas.filter(m => m.status === 'em_andamento').length
-
-    return {
-      title: 'Relatório Geral',
-      stats: {
-        totalEdicoes: edicoes.length,
-        totalParticipantes: participantes.length,
-        totalEquipes: equipes.length,
-        totalAtividades: atividades.length,
-        totalArrecadado,
-        totalMeta,
-        percentualMeta: totalMeta > 0 ? (totalArrecadado / totalMeta * 100).toFixed(1) : 0,
-        totalDoacoes,
-        totalPontosDoacoes,
-        totalQuantidadeDoacoes,
-        totalMetas,
-        metasConcluidas,
-        metasEmAndamento,
-        percentualMetasConcluidas: totalMetas > 0 ? (metasConcluidas / totalMetas * 100).toFixed(1) : 0
-      },
-      atividadesPorTipo
+  const handleDeleteRelatorio = async (id) => {
+    if (!confirm('Deseja excluir este relatório?')) return
+    try {
+      await axios.delete(`http://localhost:3001/api/relatorios/${id}`)
+      setRelatorios(prev => prev.filter(r => r.id !== id))
+    } catch (err) {
+      console.error('Erro ao excluir relatório:', err)
+      alert('Falha ao excluir. Veja console.')
     }
   }
 
-  // 🔹 Relatório por Período
-  const generatePeriodoReport = () => {
-    const hoje = new Date()
-    const mesPassado = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate())
-    const atividadesRecentes = atividades.filter(a => new Date(a.dataInicio) >= mesPassado)
-    const arrecadacaoRecente = atividadesRecentes.reduce((sum, a) => sum + (parseFloat(a.arrecadado) || 0), 0)
-
-    return {
-      title: 'Relatório por Período (Último Mês)',
-      stats: {
-        atividadesNoMes: atividadesRecentes.length,
-        arrecadacaoNoMes: arrecadacaoRecente,
-        mediaArrecadacao: atividadesRecentes.length > 0
-          ? (arrecadacaoRecente / atividadesRecentes.length).toFixed(2)
-          : 0
-      },
-      atividades: atividadesRecentes
-    }
+  const handleViewRelatorio = (r) => {
+    setSelectedRelatorio(r)
+    setShowViewModal(true)
   }
 
-  // 🔹 Relatório por Equipe
-  const generateEquipeReport = () => {
-    const equipesComStats = equipes.map(eq => {
-      const atividadesEquipe = atividades.filter(a => a.equipeId === eq.id.toString())
-      const arrecadado = atividadesEquipe.reduce((sum, a) => sum + (parseFloat(a.arrecadado) || 0), 0)
-      return {
-        ...eq,
-        totalAtividades: atividadesEquipe.length,
-        totalArrecadado: arrecadado
+  // --- Helpers robustos para extrair tipo/quantidade/pontos
+  const safeParseJSON = (val) => {
+    if (!val) return {}
+    try { return (typeof val === 'string') ? JSON.parse(val) : val } catch { return {} }
+  }
+
+  const parseQuantidadeFromRel = (r) => {
+    // procura em vários campos possíveis
+    if (!r) return 0
+    if (r.quantidade != null) return parseFloat(String(r.quantidade).replace(',', '.')) || 0
+    if (r.qtd != null) return parseFloat(String(r.qtd).replace(',', '.')) || 0
+    // dados_json
+    const dj = safeParseJSON(r.dados_json)
+    if (dj.quantidade != null) return parseFloat(String(dj.quantidade).replace(',', '.')) || 0
+    if (dj.impacto) {
+      const m = String(dj.impacto).match(/([\d\.,]+)/)
+      if (m) return parseFloat(m[1].replace(',', '.')) || 0
+    }
+    // campo impacto direto
+    if (r.impacto) {
+      const m = String(r.impacto).match(/([\d\.,]+)/)
+      if (m) return parseFloat(m[1].replace(',', '.')) || 0
+    }
+    return 0
+  }
+
+  const parseTipoFromRel = (r) => {
+    if (!r) return 'outro'
+    // campos diretos
+    if (r.tipoImpacto) return String(r.tipoImpacto).toLowerCase()
+    if (r.tipo) return String(r.tipo).toLowerCase()
+    // dados_json
+    const dj = safeParseJSON(r.dados_json)
+    if (dj.tipoImpacto) return String(dj.tipoImpacto).toLowerCase()
+    if (dj.tipo) return String(dj.tipo).toLowerCase()
+    // impacto text
+    const text = (r.impacto || r.titulo || '').toLowerCase()
+    if (text.includes('r$') || text.includes('dinheiro')) return 'dinheiro'
+    if (text.includes('arroz')) return 'arroz'
+    if (text.includes('feijão') || text.includes('feijao') || text.includes('feijao')) return 'feijao'
+    if (text.includes('óleo') || text.includes('oleo') || text.includes('l')) return 'oleo'
+    return 'outro'
+  }
+
+  const pontosDoRelatorio = (r) => {
+    const tipo = parseTipoFromRel(r)
+    let key = tipo
+    if (tipo === 'feijão') key = 'feijao'
+    if (!(key in itemPontos)) key = 'outro'
+    const qtd = parseQuantidadeFromRel(r) || 0
+    const peso = itemPontos[key] || itemPontos['outro'] || 1
+    return qtd * peso
+  }
+
+  // --- Mapear nome da equipe a partir do relatorio (tenta id numérico, depois trata strings)
+  const getEquipeNameFromRel = (r) => {
+    if (!r) return '—'
+    // 1) se tem equipe_id numérico -> procura no array equipes
+    const maybeId = r.equipe_id ?? r.equipeId ?? r.equipe
+    if (maybeId != null && String(maybeId).trim() !== '') {
+      if (!isNaN(parseInt(maybeId))) {
+        const eq = equipes.find(e => String(e.id) === String(maybeId))
+        if (eq) return eq.nome
+      } else {
+        // equipe_id é uma string (provavelmente nome) — tenta achar por nome
+        const eq = equipes.find(e => String(e.nome).toLowerCase() === String(maybeId).toLowerCase())
+        if (eq) return eq.nome
       }
-    })
-
-    return {
-      title: 'Relatório por Equipe',
-      equipes: equipesComStats.sort((a, b) => b.totalArrecadado - a.totalArrecadado)
     }
+    // 2) se não há, tenta achar por título contendo nome da equipe
+    const title = r.titulo || ''
+    const found = equipes.find(e => title && title.toLowerCase().includes(String(e.nome).toLowerCase()))
+    if (found) return found.nome
+    // 3) fallback -> título ou '—'
+    return r.titulo || '—'
   }
 
-  // 🔹 Relatório de Equipe por Período
+  // --- Geração de relatórios exibidos
+  const generateGeralReport = () => {
+    const pontosPorEquipe = {}
+    relatorios.forEach(r => {
+      const nome = getEquipeNameFromRel(r)
+      const pts = pontosDoRelatorio(r)
+      pontosPorEquipe[nome] = (pontosPorEquipe[nome] || 0) + pts
+    })
+    return { title: 'Relatório Geral', pontosPorEquipe }
+  }
+
   const generateEquipePeriodoReport = () => {
     const hoje = new Date()
     const mesPassado = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate())
-    const equipesComStats = equipes.map(eq => {
-      const atividadesEquipe = atividades.filter(a =>
-        a.equipeId === eq.id.toString() && new Date(a.dataInicio) >= mesPassado
-      )
-      const arrecadado = atividadesEquipe.reduce((sum, a) => sum + (parseFloat(a.arrecadado) || 0), 0)
-      return {
-        ...eq,
-        atividadesNoMes: atividadesEquipe.length,
-        arrecadadoNoMes: arrecadado
-      }
+    const equipesComPontos = equipes.map(eq => {
+      const pontos = relatorios
+        .filter(r => {
+          // aceita r.equipe_id numérico ou r.titulo contendo nome
+          const matchesId = r.equipe_id != null && !isNaN(parseInt(r.equipe_id)) && String(r.equipe_id) === String(eq.id)
+          const matchesNome = (r.titulo && String(r.titulo).toLowerCase().includes(String(eq.nome).toLowerCase()))
+          // created_at pode vir em created_at ou createdAt
+          const created = new Date(r.created_at || r.createdAt || r.createdAt || 0)
+          return (matchesId || matchesNome) && created >= mesPassado
+        })
+        .reduce((acc, r) => acc + pontosDoRelatorio(r), 0)
+      return { ...eq, pontos }
     })
+    return { title: 'Equipes (Último Mês)', equipes: equipesComPontos }
+  }
 
-    return {
-      title: 'Equipe por Período (Último Mês)',
-      equipes: equipesComStats.filter(eq => eq.atividadesNoMes > 0)
-        .sort((a, b) => b.arrecadadoNoMes - a.arrecadadoNoMes)
+  // Atualiza reportData quando filter ou dados mudam
+  useEffect(() => {
+    if (relatorios.length === 0) {
+      setReportData({})
+      return
     }
-  }
+    if (reportFilter === 'equipe-periodo') setReportData(generateEquipePeriodoReport())
+    else setReportData(generateGeralReport())
+  }, [reportFilter, relatorios, equipes, atividades])
 
-  const formatImpacto = (tipo, valor) => {
-    if (tipo === 'dinheiro') return `R$ ${valor.toFixed(2)}`
-    if (tipo === 'arroz') return `${valor} kg`
-    if (tipo === 'óleo') return `${valor} L`
-    return valor
-  }
+  if (!active) return null
 
-  const getMentorNome = (mentorId) => {
-    const mentor = participantes.find(p => p.id === parseInt(mentorId))
-    return mentor ? mentor.nome : 'N/A'
-  }
-
-  // ============================================================
-  // ===================== RENDERIZAÇÃO =========================
-  // ============================================================
   return (
     <section className={`section ${active ? 'active' : ''}`}>
       <div className="container">
-        <h2>📊 Relatórios</h2>
-
-        {/* === SELETOR DE RELATÓRIO === */}
-        <div className="reports-grid">
-          <div className="report-card" onClick={() => generateReport('geral')}>
-            <i className="fas fa-chart-line"></i>
-            <h3>Relatório Geral</h3>
-            <p>Visão geral de todas as atividades</p>
-          </div>
-
-          <div className="report-card" onClick={() => generateReport('periodo')}>
-            <i className="fas fa-calendar-alt"></i>
-            <h3>Relatório por Período</h3>
-            <p>Atividades do último mês</p>
-          </div>
-
-          <div className="report-card" onClick={() => generateReport('equipe')}>
-            <i className="fas fa-users"></i>
-            <h3>Relatório por Equipe</h3>
-            <p>Desempenho das equipes</p>
-          </div>
-
-          <div className="report-card" onClick={() => generateReport('equipe-periodo')}>
-            <i className="fas fa-chart-bar"></i>
-            <h3>Equipe por Período</h3>
-            <p>Equipes e resultados recentes</p>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2>📊 Relatórios</h2>
+          <button className="btn btn-primary" onClick={() => setShowCreateReportModal(true)}>+ Criar Relatório de Equipe</button>
         </div>
 
-        {/* === RESULTADO DO RELATÓRIO === */}
-        {showResult && reportData && (
-          <div className="report-result active">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3>{reportData.title}</h3>
-              <button className="btn btn-outline" onClick={() => setShowResult(false)}>Fechar</button>
-            </div>
+        <div style={{ margin: '1rem 0', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <label><strong>Filtrar gráfico por:</strong></label>
+          <select value={reportFilter} onChange={(e) => setReportFilter(e.target.value)} style={{ padding: '0.4rem 0.8rem' }}>
+            <option value="geral">Geral</option>
+            <option value="equipe-periodo">Equipes (Último Mês)</option>
+          </select>
+        </div>
 
-            {/* === RELATÓRIO GERAL === */}
-            {reportType === 'geral' && (
-              <>
-                <div className="dashboard-stats">
-                  {Object.entries(reportData.stats).slice(0, 6).map(([key, value]) => (
-                    <div key={key} className="stat-card">
-                      <h4>{key.replace(/([A-Z])/g, ' $1')}</h4>
-                      <p>{typeof value === 'number' ? value : String(value)}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <h4>Atividades por Tipo</h4>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={Object.entries(reportData.atividadesPorTipo).map(([k, v]) => ({ tipo: k, valor: v }))}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="tipo" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="valor" fill="#1abc9c" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </>
-            )}
-
-            {/* === RELATÓRIO POR EQUIPE === */}
-            {(reportType === 'equipe' || reportType === 'equipe-periodo') && (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <h4>Equipes</h4>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => window.dispatchEvent(new CustomEvent('abrirModalRelatorio'))}
-                  >
-                    + Criar Relatório de Equipe
-                  </button>
-                </div>
-
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart
-                    data={reportData.equipes.map(eq => ({
-                      nome: eq.nome,
-                      valor: reportType === 'equipe-periodo' ? eq.arrecadadoNoMes : eq.totalArrecadado
-                    }))}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="nome" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="valor" fill="#9b59b6" />
-                  </BarChart>
-                </ResponsiveContainer>
-
-                <div className="table-container">
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Equipe</th>
-                        <th>Mentor</th>
-                        <th>{reportType === 'equipe-periodo' ? 'Atividades no Mês' : 'Total Atividades'}</th>
-                        <th>{reportType === 'equipe-periodo' ? 'Arrecadado no Mês' : 'Total Arrecadado'}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {reportData.equipes.map(eq => (
-                        <tr key={eq.id}>
-                          <td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <img
-                              src={eq.fotoUrl || 'https://via.placeholder.com/40'}
-                              alt={eq.nome}
-                              style={{ width: '40px', height: '40px', borderRadius: '50%' }}
-                            />
-                            {eq.nome}
-                          </td>
-                          <td>{getMentorNome(eq.mentorId)}</td>
-                          <td>{reportType === 'equipe-periodo' ? eq.atividadesNoMes : eq.totalAtividades}</td>
-                          <td>{formatImpacto('dinheiro', reportType === 'equipe-periodo' ? eq.arrecadadoNoMes : eq.totalArrecadado)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
+        {/* Gráfico Geral (pontos por equipe) */}
+        {reportFilter === 'geral' && reportData?.pontosPorEquipe && Object.keys(reportData.pontosPorEquipe).length > 0 ? (
+          <div style={{ width: '100%', height: 300 }}>
+            <ResponsiveContainer>
+              <BarChart data={Object.entries(reportData.pontosPorEquipe).map(([nome, pts]) => ({ nome, pts }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="nome" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="pts" fill="#1abc9c" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        )}
+        ) : reportFilter === 'geral' ? (
+          <p style={{ textAlign: 'center', marginTop: '1rem' }}>Nenhum dado disponível para o gráfico geral.</p>
+        ) : null}
 
-        {/* === LISTA DE RELATÓRIOS SALVOS === */}
-        {relatorios.length > 0 && (
-          <div style={{ marginTop: '2rem' }}>
-            <h3>📁 Relatórios Salvos</h3>
-            {loading ? (
-              <p>Carregando relatórios...</p>
-            ) : (
+        {/* Gráfico Último Mês por equipe */}
+        {reportFilter === 'equipe-periodo' && reportData?.equipes?.length > 0 ? (
+          <div style={{ width: '100%', height: 320 }}>
+            <ResponsiveContainer>
+              <BarChart data={reportData.equipes.map(eq => ({ nome: eq.nome, pontos: eq.pontos }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="nome" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="pontos" fill="#9b59b6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : reportFilter === 'equipe-periodo' ? (
+          <p style={{ textAlign: 'center', marginTop: '1rem' }}>Nenhum dado disponível para o último mês.</p>
+        ) : null}
+
+        {/* Lista de relatórios criados */}
+        <div style={{ marginTop: '2rem' }}>
+          <h3>📁 Relatórios Criados</h3>
+          {loading ? <p>Carregando...</p> : (
+            relatorios.length === 0 ? <p>Nenhum relatório criado ainda.</p> : (
               <table className="data-table">
                 <thead>
                   <tr>
                     <th>Título</th>
-                    <th>Tipo</th>
                     <th>Equipe</th>
+                    <th>Pontos</th>
                     <th>Data</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {relatorios.map(r => (
-                    <tr key={r.id}>
-                      <td>{r.titulo}</td>
-                      <td>{r.tipo}</td>
-                      <td>{r.equipe_id || '—'}</td>
-                      <td>{new Date(r.created_at).toLocaleDateString('pt-BR')}</td>
-                    </tr>
-                  ))}
+                  {relatorios.map(r => {
+                    const equipeNome = getEquipeNameFromRel(r)
+                    const pts = pontosDoRelatorio(r)
+                    return (
+                      <tr key={r.id}>
+                        <td>{r.titulo}</td>
+                        <td>{equipeNome}</td>
+                        <td>{pts}</td>
+                        <td>{new Date(r.created_at || r.createdAt || Date.now()).toLocaleDateString('pt-BR')}</td>
+                        <td>
+                          <button className="btn btn-sm btn-outline" onClick={() => handleViewRelatorio(r)}>👁️ Ver</button>
+                          <button className="btn btn-sm btn-danger" onClick={() => handleDeleteRelatorio(r.id)}>🗑️ Excluir</button>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
-            )}
+            )
+          )}
+        </div>
+
+        {/* Top 5 ranking (fixo) */}
+        {relatorios.length > 0 && (
+          <div style={{ marginTop: '2.5rem' }}>
+            <h3>🏆 Top 5 Equipes com Mais Pontos</h3>
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer>
+                <BarChart
+                  data={Object.entries(
+                    relatorios.reduce((acc, r) => {
+                      const nome = getEquipeNameFromRel(r) || 'Sem equipe'
+                      acc[nome] = (acc[nome] || 0) + pontosDoRelatorio(r)
+                      return acc
+                    }, {})
+                  )
+                    .map(([nome, pontos]) => ({ nome, pontos }))
+                    .sort((a, b) => b.pontos - a.pontos)
+                    .slice(0, 5)
+                  }
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="nome" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="pontos" fill="#f39c12" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
+
+        {/* Modais */}
+        <ModalRelatorioEquipe
+          show={showCreateReportModal}
+          onClose={() => setShowCreateReportModal(false)}
+          onSubmit={handleCreateRelatorio}
+        />
+
+        <ModalVerRelatorio
+          show={showViewModal}
+          onClose={() => setShowViewModal(false)}
+          relatorio={selectedRelatorio}
+          equipes={equipes}
+          participantes={participantes}
+          pontosDoRelatorio={pontosDoRelatorio}
+        />
       </div>
     </section>
   )
