@@ -1,255 +1,170 @@
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
-dotenv.config();
-import express from 'express'
-import cors from 'cors'
-import bodyParser from 'body-parser'
-import mysql from 'mysql2/promise'
+import mysql from 'mysql2/promise';
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+// ======== CONFIGURAÇÃO INICIAL ======== //
+dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
-import imagesRoutes from './src/routes/images.js';
-app.use('/api', imagesRoutes);
 
-// Middleware
+// ======== CONFIGURAÇÕES BÁSICAS ======== //
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Configuração do banco de dados MySQL
+// ======== CAMINHOS DO SISTEMA ======== //
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ======== UPLOAD DE IMAGENS ======== //
+const uploadDir = path.join(__dirname, 'src', 'uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${Math.floor(Math.random() * 1e9)}${ext}`);
+  },
+});
+const upload = multer({ storage });
+
+// Servir imagens estáticas
+app.use('/uploads', express.static(uploadDir));
+
+// ======== BANCO DE DADOS (MySQL) ======== //
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'liderancas_empaticas',
   port: process.env.DB_PORT || 3306,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
 };
 
 let db;
 
-// Função para conectar ao MySQL
 async function connectToDatabase() {
   try {
-    db = mysql.createPool(dbConfig);
-    console.log('Conectado ao banco de dados MySQL.');
+    db = await mysql.createPool(dbConfig);
+    console.log('✅ Conectado ao banco de dados MySQL.');
     await initializeDatabase();
   } catch (error) {
-    console.error('Erro ao conectar com o banco de dados:', error.message);
+    console.error('❌ Erro ao conectar ao banco:', error);
     process.exit(1);
   }
 }
 
-// Inicializar tabelas do banco de dados
 async function initializeDatabase() {
-  try {
-    // Tabela de Edições
-    await db.execute(`CREATE TABLE IF NOT EXISTS edicoes (
+  // 🔹 Usuários
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS usuarios (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      nome VARCHAR(255) NOT NULL,
-      dataInicio DATE NOT NULL,
-      dataFim DATE NOT NULL,
-      descricao TEXT,
-      status VARCHAR(50) DEFAULT 'Planejada',
+      name VARCHAR(255),
+      email VARCHAR(255) UNIQUE,
+      password VARCHAR(255),
+      tipo VARCHAR(50) DEFAULT 'aluno',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`);
+    )
+  `);
+  console.log('🗃️  Tabela "usuarios" verificada.');
 
-    // Tabela de Participantes
-    await db.execute(`CREATE TABLE IF NOT EXISTS participantes (
+  // 🔹 Relatórios
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS relatorios (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      nome VARCHAR(255) NOT NULL,
-      email VARCHAR(255) UNIQUE NOT NULL,
-      telefone VARCHAR(20),
-      tipo VARCHAR(50) NOT NULL,
-      edicao_id INT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (edicao_id) REFERENCES edicoes (id) ON DELETE SET NULL
-    )`);
-
-    // Tabela de Equipes
-    await db.execute(`CREATE TABLE IF NOT EXISTS equipes (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      nome VARCHAR(255) NOT NULL,
-      mentor VARCHAR(255),
-      edicao_id INT,
-      membros TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (edicao_id) REFERENCES edicoes (id) ON DELETE SET NULL
-    )`);
-
-    // Tabela de Atividades
-    await db.execute(`CREATE TABLE IF NOT EXISTS atividades (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      nome VARCHAR(255) NOT NULL,
-      tipo VARCHAR(100) NOT NULL,
-      descricao TEXT,
-      equipe_id INT,
-      meta_financeira DECIMAL(10,2) DEFAULT 0,
-      valor_arrecadado DECIMAL(10,2) DEFAULT 0,
-      status VARCHAR(50) DEFAULT 'Pendente',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (equipe_id) REFERENCES equipes (id) ON DELETE SET NULL
-    )`);
-
-    // Tabela de Doações
-    await db.execute(`CREATE TABLE IF NOT EXISTS doacoes (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      data_doacao DATE NOT NULL,
-      aluno_responsavel VARCHAR(255) NOT NULL,
-      item_doacao VARCHAR(255) NOT NULL,
-      quantidade DECIMAL(10,2) NOT NULL,
-      campanha VARCHAR(255),
-      doador VARCHAR(255),
-      pontuacao INT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`);
-
-    // Tabela de Metas
-    await db.execute(`CREATE TABLE IF NOT EXISTS metas (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      data DATE NOT NULL,
       titulo VARCHAR(255) NOT NULL,
-      descricao TEXT,
-      equipe VARCHAR(255),
-      prioridade ENUM('baixa', 'media', 'alta') DEFAULT 'media',
-      status ENUM('pendente', 'em_andamento', 'concluida', 'cancelada') DEFAULT 'pendente',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`);
-
-    console.log('Tabelas do banco de dados inicializadas.');
-  } 
-  catch (error) {
-    console.error('Erro ao inicializar tabelas:', error);
-  }
-  
+      tipo ENUM('geral', 'equipe', 'atividade', 'financeiro', 'participacao') NOT NULL,
+      periodo_inicio DATE,
+      periodo_fim DATE,
+      equipe_id INT,
+      edicao_id INT,
+      gerado_por VARCHAR(255),
+      dados_json JSON,
+      arquivo_path VARCHAR(500),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL,
+      FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL,
+      INDEX idx_relatorios_tipo (tipo),
+      INDEX idx_relatorios_periodo (periodo_inicio, periodo_fim)
+    )
+  `);
+  console.log('📊 Tabela "relatorios" verificada.');
 }
 
-// Função para executar queries
-async function executeQuery(query, params = []) {
-  try {
-    const [rows] = await db.execute(query, params);
-    return rows;
-  } catch (error) {
-    console.error('Erro ao executar query:', error);
-    throw error;
-  }
-}
+// Disponibiliza função global de queries
+app.locals.executeQuery = async (sql, params = []) => {
+  const [rows] = await db.query(sql, params);
+  return rows;
+};
 
-// Disponibilizar a função executeQuery para as rotas
-app.locals.executeQuery = executeQuery;
-
-// Importar rotas
+// ======== ROTAS IMPORTADAS ======== //
+import authRouter from './src/routes/authRouter.js';
 import edicoesRoutes from './src/routes/edicoes.js';
 import participantesRoutes from './src/routes/participantes.js';
 import equipesRoutes from './src/routes/equipes.js';
 import atividadesRoutes from './src/routes/atividades.js';
 import doacoesRoutes from './src/routes/doacoes.js';
 import metasRoutes from './src/routes/metas.js';
+import relatoriosRoutes from './src/routes/relatorios.js'; // ✅ NOVO
 
-
-// Usar rotas
+// ======== ROTAS PRINCIPAIS ======== //
+app.use('/api/auth', authRouter);
 app.use('/api/edicoes', edicoesRoutes);
 app.use('/api/participantes', participantesRoutes);
 app.use('/api/equipes', equipesRoutes);
 app.use('/api/atividades', atividadesRoutes);
 app.use('/api/doacoes', doacoesRoutes);
 app.use('/api/metas', metasRoutes);
+app.use('/api/relatorios', relatoriosRoutes); // ✅ NOVA ROTA DE RELATÓRIOS
 
-// Rota de teste
-app.get('/api/test', (req, res) => {
-  res.json({ 
-    message: 'API Lideranças Empáticas funcionando!',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    database: 'MySQL'
-  });
-});
-
-// Rota para informações da API
-app.get('/api', (req, res) => {
+// ======== ROTAS DE TESTE ======== //
+app.get('/', (req, res) => {
   res.json({
-    name: 'Lideranças Empáticas API',
-    version: '1.0.0',
-    description: 'API para gerenciamento do sistema Lideranças Empáticas',
-    database: 'MySQL',
+    message: '🚀 API Lideranças Empáticas rodando!',
     endpoints: {
+      auth: '/api/auth',
       edicoes: '/api/edicoes',
       participantes: '/api/participantes',
       equipes: '/api/equipes',
       atividades: '/api/atividades',
-      doacoes: '/api/doacoes',
-      metas: '/api/metas',
-      test: '/api/test'
-    }
+      relatorios: '/api/relatorios',
+    },
   });
 });
 
-// Rota para verificar status da conexão com o banco
 app.get('/api/health', async (req, res) => {
   try {
-    await db.execute('SELECT 1');
-    res.json({ 
-      status: 'healthy', 
-      database: 'connected',
-      timestamp: new Date().toISOString()
-    });
+    await db.query('SELECT 1');
+    res.json({ status: 'ok', database: 'connected', time: new Date() });
   } catch (error) {
-    res.status(500).json({ 
-      status: 'unhealthy', 
-      database: 'disconnected',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
+    res.status(500).json({ status: 'error', database: 'disconnected', error: error.message });
   }
 });
 
-// Middleware de tratamento de erros
+// ======== ERROS ======== //
+app.use((req, res) => res.status(404).json({ error: 'Rota não encontrada' }));
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Algo deu errado!' });
+  console.error('Erro interno:', err);
+  res.status(500).json({ error: 'Erro interno no servidor' });
 });
 
-// Middleware para rotas não encontradas
-app.use((req, res) => {
-  res.status(404).json({ error: 'Rota não encontrada' });
-});
-
-// Inicializar conexão com o banco e iniciar servidor
+// ======== INICIAR SERVIDOR ======== //
 async function startServer() {
   await connectToDatabase();
-  
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-    console.log(`Acesse: http://localhost:${PORT}/api`);
-    console.log(`Health check: http://localhost:${PORT}/api/health`);
+  app.listen(PORT, () => {
+    console.log(`✅ Servidor rodando na porta ${PORT}`);
+    console.log(`🌍 Acesse: http://localhost:${PORT}`);
   });
 }
 
-// Tratamento de encerramento gracioso
-process.on('SIGINT', async () => {
-  console.log('Encerrando servidor...');
-  if (db) {
-    await db.end();
-    console.log('Conexão com o banco de dados fechada.');
-  }
-  process.exit(0);
-});
+startServer();
 
-process.on('SIGTERM', async () => {
-  console.log('Encerrando servidor...');
-  if (db) {
-    await db.end();
-    console.log('Conexão com o banco de dados fechada.');
-  }
-  process.exit(0);
-});
-
-// Iniciar o servidor
-startServer().catch(error => {
-  console.error('Erro ao iniciar servidor:', error);
-  process.exit(1);
-});
-
-
-export default {app, db, executeQuery}
+// Exporta para uso em outras rotas
+export { db };
+export default app;

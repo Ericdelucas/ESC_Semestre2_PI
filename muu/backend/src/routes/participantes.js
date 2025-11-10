@@ -6,10 +6,9 @@ router.get('/', async (req, res) => {
   try {
     const executeQuery = req.app.locals.executeQuery;
     const sql = `
-      SELECT p.*, e.nome as edicao_nome 
-      FROM participantes p 
-      LEFT JOIN edicoes e ON p.edicao_id = e.id 
-      ORDER BY p.created_at DESC
+      SELECT *
+      FROM participantes
+      ORDER BY created_at DESC
     `;
     
     const rows = await executeQuery(sql);
@@ -28,10 +27,9 @@ router.get('/:id', async (req, res) => {
   try {
     const executeQuery = req.app.locals.executeQuery;
     const sql = `
-      SELECT p.*, e.nome as edicao_nome 
-      FROM participantes p 
-      LEFT JOIN edicoes e ON p.edicao_id = e.id 
-      WHERE p.id = ?
+      SELECT *
+      FROM participantes
+      WHERE id = ?
     `;
     const params = [req.params.id];
     
@@ -50,42 +48,18 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// GET - Buscar participantes por edição
-router.get('/edicao/:edicaoId', async (req, res) => {
-  try {
-    const executeQuery = req.app.locals.executeQuery;
-    const sql = `
-      SELECT p.*, e.nome as edicao_nome 
-      FROM participantes p 
-      LEFT JOIN edicoes e ON p.edicao_id = e.id 
-      WHERE p.edicao_id = ?
-      ORDER BY p.nome
-    `;
-    const params = [req.params.edicaoId];
-    
-    const rows = await executeQuery(sql, params);
-    
-    res.json({
-      message: 'Participantes da edição listados com sucesso',
-      data: rows
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// POST - Criar novo participante
+// POST - Criar novo participante (sem edicao_id)
 router.post('/', async (req, res) => {
   try {
-    const { nome, email, telefone, tipo, edicao_id } = req.body;
+    const { nome, email, telefone, tipo } = req.body;
     
     if (!nome || !email || !tipo) {
       return res.status(400).json({ error: 'Nome, email e tipo são obrigatórios' });
     }
 
     const executeQuery = req.app.locals.executeQuery;
-    const sql = 'INSERT INTO participantes (nome, email, telefone, tipo, edicao_id) VALUES (?, ?, ?, ?, ?)';
-    const params = [nome, email, telefone, tipo, edicao_id];
+    const sql = 'INSERT INTO participantes (nome, email, telefone, tipo) VALUES (?, ?, ?, ?)';
+    const params = [nome, email, telefone, tipo];
     
     const result = await executeQuery(sql, params);
     
@@ -96,8 +70,7 @@ router.post('/', async (req, res) => {
         nome,
         email,
         telefone,
-        tipo,
-        edicao_id
+        tipo
       }
     });
   } catch (error) {
@@ -109,18 +82,18 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT - Atualizar participante
+// PUT - Atualizar participante (sem edicao_id)
 router.put('/:id', async (req, res) => {
   try {
-    const { nome, email, telefone, tipo, edicao_id } = req.body;
+    const { nome, email, telefone, tipo } = req.body;
     
     if (!nome || !email || !tipo) {
       return res.status(400).json({ error: 'Nome, email e tipo são obrigatórios' });
     }
 
     const executeQuery = req.app.locals.executeQuery;
-    const sql = 'UPDATE participantes SET nome = ?, email = ?, telefone = ?, tipo = ?, edicao_id = ? WHERE id = ?';
-    const params = [nome, email, telefone, tipo, edicao_id, req.params.id];
+    const sql = 'UPDATE participantes SET nome = ?, email = ?, telefone = ?, tipo = ? WHERE id = ?';
+    const params = [nome, email, telefone, tipo, req.params.id];
     
     const result = await executeQuery(sql, params);
     
@@ -134,8 +107,7 @@ router.put('/:id', async (req, res) => {
           nome,
           email,
           telefone,
-          tipo,
-          edicao_id
+          tipo
         }
       });
     }
@@ -170,5 +142,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// module.exports = router;
-export default router
+export default router;
