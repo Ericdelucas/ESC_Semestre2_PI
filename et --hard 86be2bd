@@ -1,0 +1,28 @@
+[33m3f48551[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: reset: moving to 3f48551
+[33m86be2bd[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{1}: pull --tags origin main: Merge made by the 'ort' strategy.
+[33m20240ec[m HEAD@{2}: reset: moving to 20240ec
+[33m5357c0c[m[33m ([m[1;31morigin/Entrega[m[33m, [m[1;32mEntrega[m[33m)[m HEAD@{3}: checkout: moving from main to main
+[33m5357c0c[m[33m ([m[1;31morigin/Entrega[m[33m, [m[1;32mEntrega[m[33m)[m HEAD@{4}: reset: moving to Entrega
+[33m20240ec[m HEAD@{5}: checkout: moving from Entrega to main
+[33m5357c0c[m[33m ([m[1;31morigin/Entrega[m[33m, [m[1;32mEntrega[m[33m)[m HEAD@{6}: pull origin Entrega: Fast-forward
+[33m780eb26[m HEAD@{7}: checkout: moving from main to Entrega
+[33m20240ec[m HEAD@{8}: checkout: moving from main to main
+[33m20240ec[m HEAD@{9}: checkout: moving from Entrega to main
+[33m780eb26[m HEAD@{10}: checkout: moving from main to Entrega
+[33m20240ec[m HEAD@{11}: commit: adm
+[33m65b8c34[m HEAD@{12}: checkout: moving from Entrega to main
+[33m780eb26[m HEAD@{13}: checkout: moving from Stephanie to Entrega
+[33m624eb90[m[33m ([m[1;31morigin/Stephanie[m[33m, [m[1;32mStephanie[m[33m)[m HEAD@{14}: commit: aaa
+[33m65b8c34[m HEAD@{15}: checkout: moving from main to Stephanie
+[33m65b8c34[m HEAD@{16}: pull --tags origin main: Fast-forward
+[33m3f48551[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{17}: commit: adeus
+[33m780eb26[m HEAD@{18}: reset: moving to Entrega
+[33md9f7e35[m HEAD@{19}: checkout: moving from Entrega to main
+[33m780eb26[m HEAD@{20}: pull origin Entrega: Fast-forward
+[33m2b91ba8[m HEAD@{21}: checkout: moving from main to Entrega
+[33md9f7e35[m HEAD@{22}: reset: moving to HEAD
+[33md9f7e35[m HEAD@{23}: checkout: moving from Entrega to main
+[33m2b91ba8[m HEAD@{24}: checkout: moving from main to Entrega
+[33md9f7e35[m HEAD@{25}: commit: Backdate: commit em 07/11/2025
+[33m07aab95[m HEAD@{26}: pull --tags origin main: Merge made by the 'ort' strategy.
+[33me257cb6[m HEAD@{27}: commit: exemplo de env
