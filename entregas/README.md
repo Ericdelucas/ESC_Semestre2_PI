@@ -47,6 +47,27 @@ Por meio da plataforma, os usuários podem cadastrar alunos, equipes e campanhas
 </pre>
 
 ## 🛠 Instalação
+<<<<<<< HEAD
+
+<b>Android:</b>
+
+Faça o Download do JOGO.apk no seu celular.
+Execute o APK e siga as instruções de seu telefone.
+
+```sh
+Coloque código do prompt de comnando se for necessário
+```
+
+<b>Windows:</b>
+
+Não há instalação! Apenas executável!
+Encontre o JOGO.exe na pasta executáveis e execute-o como qualquer outro programa.
+
+```sh
+Coloque código do prompt de comnando se for necessário
+```
+=======
+>>>>>>> 86be2bd6fb2754d8cf386546cb2a3b07ffdf61c8
 
 <b>HTML:</b>
 
@@ -62,10 +83,13 @@ Abra o terminal dentro da pasta:
 <pre>
 ESC_Semestre2_PI\muu\muu
 </pre>
+<<<<<<< HEAD
+=======
 Ao mesmo tempo ligamos o backend:
 <pre>
 ESC_Semestre2_PI\muu\Backend
 </pre>
+>>>>>>> 86be2bd6fb2754d8cf386546cb2a3b07ffdf61c8
 
 📌 Dica: Se estiver usando o VS Code, clique com o botão direito nessa pasta e escolha
 “Abrir no Terminal Integrado”.
@@ -175,5 +199,8 @@ Você deve ver uma resposta semelhante a:
 Aqui estão as referências usadas no projeto.
 
 1. <https://liderancasempaticas.com/>
+<<<<<<< HEAD
+=======
 2. <https://www.linkedin.com/company/projeto-lideran%C3%A7as-emp%C3%A1ticas/>
 3. <https://www.instagram.com/liderancasempaticas/>
+>>>>>>> 86be2bd6fb2754d8cf386546cb2a3b07ffdf61c8
