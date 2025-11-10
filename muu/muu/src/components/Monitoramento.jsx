@@ -1,4 +1,3 @@
-import CountdownTimer from './Monitoring/CountdownTimer'
 import Timeline from './Monitoring/Timeline'
 
 function Monitoramento({ active, edicoes, participantes, equipes, atividades, metas, doacoes, onNavigate }) {
@@ -72,11 +71,7 @@ function Monitoramento({ active, edicoes, participantes, equipes, atividades, me
           </div>
         </div>
 
-        {/* Countdown Timer */}
-        <CountdownTimer 
-          targetDate={getTargetDate()}
-          title="Tempo Restante para Conclusão das Tarefas"
-        />
+        {/* 🚫 CountdownTimer removido completamente */}
 
         {/* Cards de Estatísticas de Monitoramento */}
         <div className="monitoring-stats">
@@ -185,4 +180,3 @@ function Monitoramento({ active, edicoes, participantes, equipes, atividades, me
 }
 
 export default Monitoramento
-
