@@ -31,7 +31,10 @@ function Atividades({ active, atividades, setAtividades, equipes: equipesProp })
     const fetchEquipes = async () => {
       try {
         const res = await equipesService.getAll();
-        setEquipes(res.data.data || []);
+        const data = Array.isArray(res.data)
+          ? res.data
+          : res.data?.data || [];
+        setEquipes(data);
       } catch (error) {
         console.error("Erro ao carregar equipes:", error);
       }
@@ -51,7 +54,10 @@ function Atividades({ active, atividades, setAtividades, equipes: equipesProp })
     try {
       setLoading(true);
       const response = await atividadesService.getAll();
-      setAtividades(response.data.data || []);
+      const data = Array.isArray(response.data)
+        ? response.data
+        : response.data?.data || [];
+      setAtividades(data);
     } catch (error) {
       console.error("Erro ao carregar atividades:", error);
       alert("Erro ao carregar atividades. Verifique se o backend está rodando.");
@@ -60,6 +66,7 @@ function Atividades({ active, atividades, setAtividades, equipes: equipesProp })
     }
   };
 
+  // 🔹 Criar ou atualizar atividade
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
@@ -135,7 +142,13 @@ function Atividades({ active, atividades, setAtividades, equipes: equipesProp })
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const getEquipeNome = (atividade) => atividade.equipe_nome || "—";
+  // ✅ Usa o nome da equipe corretamente, mesmo se vier como ID
+  const getEquipeNome = (atividade) => {
+    if (atividade.equipe_nome) return atividade.equipe_nome;
+    const equipeId = atividade.equipe_id || atividade.equipeId;
+    const equipe = equipes.find((e) => e.id === parseInt(equipeId));
+    return equipe ? equipe.nome : "—";
+  };
 
   const formatPoints = (value) => (!value ? "0 pts" : `${value.toLocaleString("pt-BR")} pts`);
 

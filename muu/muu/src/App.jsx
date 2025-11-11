@@ -19,7 +19,7 @@ import Perfil from './components/Perfil'
 import Graficos from './components/Graficos'
 import ModalRelatorioEquipe from './modal/ModalRelatorioEquipe'
 
-// 🔒 Controle de acesso por tipo de usuário
+// 🔒 Controle de acesso
 const ACCESS_MAP = {
   administrador: [
     'dashboard', 'edicoes', 'participantes', 'equipes', 'atividades',
@@ -29,12 +29,8 @@ const ACCESS_MAP = {
     'dashboard', 'participantes', 'equipes', 'atividades',
     'relatorios', 'monitoramento', 'perfil', 'graficos'
   ],
-  mentor: [
-    'dashboard', 'participantes', 'equipes', 'atividades', 'perfil', 'relatorios'
-  ],
-  aluno: [
-    'dashboard', 'doacoes', 'perfil','relatorios'
-  ]
+  mentor: ['dashboard', 'participantes', 'equipes', 'atividades', 'perfil', 'relatorios'],
+  aluno: ['dashboard', 'doacoes', 'perfil', 'relatorios']
 }
 
 function App() {
@@ -42,11 +38,9 @@ function App() {
   const [user, setUser] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
-
-  // 🔹 Novo estado global do Modal de Relatório
   const [showRelatorioModal, setShowRelatorioModal] = useState(false)
 
-  // Dados do sistema
+  // 🔹 Estados globais
   const [edicoes, setEdicoes] = useState([])
   const [participantes, setParticipantes] = useState([])
   const [equipes, setEquipes] = useState([])
@@ -54,7 +48,26 @@ function App() {
   const [metas, setMetas] = useState([])
   const [doacoes, setDoacoes] = useState([])
 
-  // 🔐 Verifica login persistente ao abrir o app
+  // 🔹 Carrega tudo do backend automaticamente após login
+  const loadAllData = async () => {
+    try {
+      const [ed, part, eqp, ati] = await Promise.all([
+        axios.get('http://localhost:3001/api/edicoes'),
+        axios.get('http://localhost:3001/api/participantes'),
+        axios.get('http://localhost:3001/api/equipes'),
+        axios.get('http://localhost:3001/api/atividades')
+      ])
+
+      setEdicoes(ed.data.data || [])
+      setParticipantes(part.data.data || [])
+      setEquipes(eqp.data.data || [])
+      setAtividades(ati.data.data || [])
+    } catch (err) {
+      console.error('Erro ao carregar dados iniciais:', err)
+    }
+  }
+
+  // 🔐 Verifica login persistente
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
@@ -66,6 +79,7 @@ function App() {
         })
         setUser(res.data.user)
         if (currentSection === 'welcome') setCurrentSection('dashboard')
+        await loadAllData() // 🔹 Carrega todos os dados assim que logar
       } catch (err) {
         console.warn('Token inválido, removendo...')
         localStorage.removeItem('token')
@@ -78,13 +92,14 @@ function App() {
   }, [])
 
   // LOGIN
-  const handleLogin = (data) => {
+  const handleLogin = async (data) => {
     const { user, token } = data
     setUser(user)
     localStorage.setItem('token', token)
     setShowLoginModal(false)
     setShowRegister(false)
     setCurrentSection('dashboard')
+    await loadAllData() // 🔹 Carrega tudo ao logar
   }
 
   // LOGOUT
@@ -94,21 +109,15 @@ function App() {
     setCurrentSection('welcome')
   }
 
-  // Atualiza dados do usuário
-  const handleUserUpdate = (newUser) => {
-    setUser(newUser)
-  }
-
-  // Deleta conta
+  const handleUserUpdate = (newUser) => setUser(newUser)
   const handleDeleteAccount = () => {
     alert('Sua conta foi excluída.')
     handleLogout()
   }
 
-  // Navegar entre seções
   const showSection = (section) => setCurrentSection(section)
 
-  // 🔐 Restringe seções conforme tipo de usuário
+  // 🔒 Bloqueia acesso fora da permissão
   useEffect(() => {
     if (user?.tipo && ACCESS_MAP[user.tipo]) {
       if (!ACCESS_MAP[user.tipo].includes(currentSection)) {
@@ -117,18 +126,15 @@ function App() {
     }
   }, [user, currentSection])
 
-  // 🔹 Ouve o evento global para abrir o modal de relatório
+  // 🔹 Modal de relatório
   useEffect(() => {
     const handleAbrirModal = () => setShowRelatorioModal(true)
     window.addEventListener('abrirModalRelatorio', handleAbrirModal)
     return () => window.removeEventListener('abrirModalRelatorio', handleAbrirModal)
   }, [])
 
-  // 🔹 Submissão do relatório (pode conectar ao backend)
   const handleSubmitRelatorio = async (dados) => {
     try {
-      console.log('📤 Enviando relatório:', dados)
-      // Exemplo de envio — ajuste conforme seu backend
       await axios.post('http://localhost:3001/api/relatorios', dados)
       alert('✅ Relatório salvo com sucesso!')
       setShowRelatorioModal(false)
@@ -156,10 +162,7 @@ function App() {
 
     return (
       <>
-        <Welcome
-          active={currentSection === 'welcome'}
-          onLogin={() => setShowLoginModal(true)}
-        />
+        <Welcome active={currentSection === 'welcome'} onLogin={() => setShowLoginModal(true)} />
 
         <Dashboard
           active={currentSection === 'dashboard'}
@@ -169,11 +172,7 @@ function App() {
           atividades={atividades}
         />
 
-        <Edicoes
-          active={currentSection === 'edicoes'}
-          edicoes={edicoes}
-          onEdicoesChange={setEdicoes}
-        />
+        <Edicoes active={currentSection === 'edicoes'} edicoes={edicoes} onEdicoesChange={setEdicoes} />
 
         <Participantes
           active={currentSection === 'participantes'}
@@ -225,12 +224,7 @@ function App() {
           onDoacoesChange={setDoacoes}
         />
 
-        <Metas
-          active={currentSection === 'metas'}
-          user={user}
-          metas={metas}
-          onMetasChange={setMetas}
-        />
+        <Metas active={currentSection === 'metas'} user={user} metas={metas} onMetasChange={setMetas} />
 
         <Perfil
           active={currentSection === 'perfil'}
@@ -240,16 +234,13 @@ function App() {
           onLogout={handleLogout}
         />
 
-        <Graficos
-          active={currentSection === 'graficos'}
-        />
+        <Graficos active={currentSection === 'graficos'} />
       </>
     )
   }
 
   return (
     <div className="App">
-      {/* 🔝 Header sempre visível */}
       <Header
         user={user}
         onLogin={() => setShowLoginModal(true)}
@@ -258,11 +249,8 @@ function App() {
         currentSection={currentSection}
       />
 
-      <main className="main">
-        {renderSection()}
-      </main>
+      <main className="main">{renderSection()}</main>
 
-      {/* 🔐 Modais */}
       <LoginModal
         show={showLoginModal}
         onClose={() => setShowLoginModal(false)}
@@ -283,7 +271,6 @@ function App() {
         }}
       />
 
-      {/* ✅ Modal Global de Relatório */}
       <ModalRelatorioEquipe
         show={showRelatorioModal}
         onClose={() => setShowRelatorioModal(false)}

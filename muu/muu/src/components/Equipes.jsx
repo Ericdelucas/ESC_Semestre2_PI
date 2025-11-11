@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { equipesService } from '../services/api'
+import { equipesService, participantesService, edicoesService } from '../services/api'
 
 function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
   const [showModal, setShowModal] = useState(false)
@@ -7,50 +7,59 @@ function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     nome: '',
-    mentorId: '',
+    mentor: '',
     membrosIds: [],
     edicaoId: '',
     descricao: ''
   })
 
-  const mentores = participantes.filter(p => p.tipo === 'mentor')
-  const alunos = participantes.filter(p => p.tipo === 'aluno')
+  const [mentores, setMentores] = useState([])
+  const [alunos, setAlunos] = useState([])
 
-  // 🔹 Carrega equipes automaticamente quando a aba estiver ativa
+  // 🔹 Carrega mentores e alunos do banco
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await participantesService.getAll()
+        const data = res.data.data || []
+        setMentores(data.filter(p => p.tipo === 'mentor'))
+        setAlunos(data.filter(p => p.tipo === 'aluno'))
+      } catch (err) {
+        console.error('Erro ao carregar participantes:', err)
+      }
+    }
+    fetchData()
+  }, [])
+
+  // 🔹 Carrega equipes automaticamente
   useEffect(() => {
     if (active) loadEquipes()
   }, [active])
 
-  // ======================================================
-  // 🔹 Função para buscar equipes no backend
-  // ======================================================
   const loadEquipes = async () => {
     try {
       setLoading(true)
-      const response = await equipesService.getAll()
-
-      // ✅ Aceita tanto { data: [...] } quanto apenas [...]
-      const data = Array.isArray(response.data)
-        ? response.data
-        : response.data?.data || []
-
-      setEquipes(data)
-    } catch (error) {
-      console.error('❌ Erro ao carregar equipes:', error)
-      alert('Erro ao carregar equipes. Verifique se o backend está rodando.')
+      const res = await equipesService.getAll()
+      setEquipes(res.data.data || [])
+    } catch (err) {
+      console.error('Erro ao carregar equipes:', err)
     } finally {
       setLoading(false)
     }
   }
 
-  // ======================================================
-  // 🔹 Salvar ou atualizar equipe
-  // ======================================================
+  // 🔹 Criação / edição
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
       setLoading(true)
-      const payload = { ...formData, membros: formData.membrosIds.join(',') }
+      const payload = {
+        nome: formData.nome,
+        mentor: formData.mentor, // usa texto direto
+        membros: formData.membrosIds.join(','),
+        edicao_id: formData.edicaoId || null,
+        descricao: formData.descricao
+      }
 
       if (editingEquipe) {
         await equipesService.update(editingEquipe.id, payload)
@@ -60,54 +69,45 @@ function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
 
       await loadEquipes()
       resetForm()
-      alert(editingEquipe ? '✅ Equipe atualizada com sucesso!' : '✅ Equipe criada com sucesso!')
-    } catch (error) {
-      console.error('Erro ao salvar equipe:', error)
-      alert('❌ Erro ao salvar equipe. Tente novamente.')
+      alert(editingEquipe ? '✅ Equipe atualizada!' : '✅ Equipe criada!')
+    } catch (err) {
+      console.error('Erro ao salvar equipe:', err)
+      alert('❌ Erro ao salvar equipe.')
     } finally {
       setLoading(false)
     }
   }
 
-  // ======================================================
   // 🔹 Editar equipe
-  // ======================================================
   const handleEdit = (equipe) => {
     setEditingEquipe(equipe)
     setFormData({
       nome: equipe.nome || '',
-      mentorId: equipe.mentorId || '',
-      membrosIds: equipe.membros?.split(',') || [],
-      edicaoId: equipe.edicaoId || '',
+      mentor: equipe.mentor || '',
+      membrosIds: equipe.membros ? equipe.membros.split(',') : [],
+      edicaoId: equipe.edicao_id || '',
       descricao: equipe.descricao || ''
     })
     setShowModal(true)
   }
 
-  // ======================================================
-  // 🔹 Deletar equipe
-  // ======================================================
+  // 🔹 Excluir equipe
   const handleDelete = async (id) => {
-    if (confirm('Tem certeza que deseja excluir esta equipe?')) {
-      try {
-        setLoading(true)
-        await equipesService.delete(id)
-        await loadEquipes()
-        alert('🗑️ Equipe excluída com sucesso!')
-      } catch (error) {
-        console.error('Erro ao excluir equipe:', error)
-        alert('❌ Erro ao excluir equipe. Tente novamente.')
-      } finally {
-        setLoading(false)
-      }
+    if (!confirm('Tem certeza que deseja excluir esta equipe?')) return
+    try {
+      setLoading(true)
+      await equipesService.delete(id)
+      await loadEquipes()
+      alert('🗑️ Equipe excluída!')
+    } catch (err) {
+      console.error('Erro ao excluir equipe:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
-  // ======================================================
-  // 🔹 Funções auxiliares
-  // ======================================================
   const resetForm = () => {
-    setFormData({ nome: '', mentorId: '', membrosIds: [], edicaoId: '', descricao: '' })
+    setFormData({ nome: '', mentor: '', membrosIds: [], edicaoId: '', descricao: '' })
     setEditingEquipe(null)
     setShowModal(false)
   }
@@ -122,16 +122,10 @@ function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
     setFormData(prev => ({ ...prev, membrosIds: selected }))
   }
 
-  const getMentorNome = (id) => participantes.find(p => p.id === parseInt(id))?.nome || 'N/A'
-  const getEdicaoNome = (id) => edicoes.find(e => e.id === parseInt(id))?.nome || 'N/A'
-  const getMembrosNomes = (ids) =>
-    ids.map(id => participantes.find(p => p.id === parseInt(id))?.nome || '').join(', ')
+  const getEdicaoNome = (id) => edicoes.find(e => e.id === parseInt(id))?.nome || '—'
 
   if (!active) return null
 
-  // ======================================================
-  // 🔹 Renderização
-  // ======================================================
   return (
     <section className="section active">
       <div className="container">
@@ -142,11 +136,7 @@ function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
           </button>
         </div>
 
-        {loading && (
-          <div className="loading-message">
-            <i className="fas fa-spinner fa-spin"></i> Carregando...
-          </div>
-        )}
+        {loading && <div className="loading-message"><i className="fas fa-spinner fa-spin"></i> Carregando...</div>}
 
         <div className="table-container">
           <table className="data-table">
@@ -161,31 +151,17 @@ function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
             </thead>
             <tbody>
               {(!equipes || equipes.length === 0) ? (
-                <tr>
-                  <td colSpan="5" className="no-data">
-                    Nenhuma equipe cadastrada.
-                  </td>
-                </tr>
+                <tr><td colSpan="5" className="no-data">Nenhuma equipe cadastrada.</td></tr>
               ) : (
-                equipes.map(equipe => (
+                equipes.map((equipe) => (
                   <tr key={equipe.id}>
                     <td>{equipe.nome}</td>
-                    <td>{getMentorNome(equipe.mentorId)}</td>
-                    <td>{getMembrosNomes(equipe.membros?.split(',') || [])}</td>
-                    <td>{getEdicaoNome(equipe.edicaoId)}</td>
+                    <td>{equipe.mentor || '—'}</td>
+                    <td>{equipe.membros || '—'}</td>
+                    <td>{getEdicaoNome(equipe.edicao_id)}</td>
                     <td>
-                      <button
-                        className="btn btn-sm btn-outline"
-                        onClick={() => handleEdit(equipe)}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleDelete(equipe.id)}
-                      >
-                        Excluir
-                      </button>
+                      <button className="btn btn-sm btn-outline" onClick={() => handleEdit(equipe)}>Editar</button>
+                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(equipe.id)}>Excluir</button>
                     </td>
                   </tr>
                 ))
@@ -194,97 +170,56 @@ function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
           </table>
         </div>
 
-        {/* Modal de criação/edição */}
         {showModal && (
           <div className="modal active">
             <div className="modal-content">
               <div className="modal-header">
                 <h2>{editingEquipe ? 'Editar Equipe' : 'Nova Equipe'}</h2>
-                <span className="close" onClick={resetForm}>
-                  &times;
-                </span>
+                <span className="close" onClick={resetForm}>&times;</span>
               </div>
 
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label>Nome da Equipe:</label>
-                  <input
-                    name="nome"
-                    value={formData.nome}
-                    onChange={handleChange}
-                    required
-                  />
+                  <input name="nome" value={formData.nome} onChange={handleChange} required />
                 </div>
 
                 <div className="form-group">
                   <label>Mentor:</label>
-                  <select
-                    name="mentorId"
-                    value={formData.mentorId}
-                    onChange={handleChange}
-                    required
-                  >
+                  <select name="mentor" value={formData.mentor} onChange={handleChange} required>
                     <option value="">Selecione um mentor...</option>
-                    {mentores.map(m => (
-                      <option key={m.id} value={m.id}>
-                        {m.nome}
-                      </option>
+                    {mentores.map((m) => (
+                      <option key={m.id} value={m.nome}>{m.nome}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="form-group">
                   <label>Membros (Alunos):</label>
-                  <select
-                    multiple
-                    name="membrosIds"
-                    value={formData.membrosIds}
-                    onChange={handleMembrosChange}
-                    style={{ height: '150px' }}
-                  >
-                    {alunos.map(a => (
-                      <option key={a.id} value={a.id}>
-                        {a.nome}
-                      </option>
+                  <select multiple name="membrosIds" value={formData.membrosIds} onChange={handleMembrosChange} style={{ height: '150px' }}>
+                    {alunos.map((a) => (
+                      <option key={a.id} value={a.nome}>{a.nome}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="form-group">
                   <label>Edição:</label>
-                  <select
-                    name="edicaoId"
-                    value={formData.edicaoId}
-                    onChange={handleChange}
-                    required
-                  >
+                  <select name="edicaoId" value={formData.edicaoId} onChange={handleChange}>
                     <option value="">Selecione...</option>
-                    {edicoes.map(e => (
-                      <option key={e.id} value={e.id}>
-                        {e.nome}
-                      </option>
+                    {edicoes.map((e) => (
+                      <option key={e.id} value={e.id}>{e.nome}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="form-group">
                   <label>Descrição:</label>
-                  <textarea
-                    name="descricao"
-                    rows="3"
-                    value={formData.descricao}
-                    onChange={handleChange}
-                  ></textarea>
+                  <textarea name="descricao" rows="3" value={formData.descricao} onChange={handleChange}></textarea>
                 </div>
 
                 <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <i className="fas fa-spinner fa-spin"></i> Salvando...
-                    </>
-                  ) : (
-                    'Salvar'
-                  )}
+                  {loading ? <><i className="fas fa-spinner fa-spin"></i> Salvando...</> : 'Salvar'}
                 </button>
               </form>
             </div>
