@@ -1,0 +1,463 @@
+-- =====================================================
+-- SCRIPT SQL PARA SISTEMA LIDERANÇAS EMPÁTICAS (ATUALIZADO)
+-- =====================================================
+
+-- Criação do banco de dados
+CREATE DATABASE IF NOT EXISTS liderancas_empaticas
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE liderancas_empaticas;
+
+-- =====================================================
+-- TABELA DE USUÁRIOS (AUTENTICAÇÃO)
+-- =====================================================
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    tipo ENUM('administrador', 'professor', 'aluno', 'mentor') DEFAULT 'aluno',
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- =====================================================
+-- TABELA DE EDIÇÕES
+-- =====================================================
+CREATE TABLE edicoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    dataInicio DATE NOT NULL,
+    dataFim DATE NOT NULL,
+    descricao TEXT,
+    status ENUM('Planejada', 'Em Andamento', 'Finalizada') DEFAULT 'Planejada',
+    meta_financeira DECIMAL(10,2) DEFAULT 0.00,
+    valor_arrecadado DECIMAL(10,2) DEFAULT 0.00,
+    numero_participantes INT DEFAULT 0,
+    numero_equipes INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- =====================================================
+-- TABELA DE PARTICIPANTES
+-- =====================================================
+CREATE TABLE participantes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    telefone VARCHAR(20),
+    tipo ENUM('aluno', 'mentor', 'professor', 'voluntario') NOT NULL,
+    curso VARCHAR(255),
+    semestre INT,
+    ra VARCHAR(50),
+    edicao_id INT,
+    equipe_id INT,
+    pontuacao_total INT DEFAULT 0,
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL,
+    INDEX idx_participantes_email (email),
+    INDEX idx_participantes_tipo (tipo),
+    INDEX idx_participantes_edicao (edicao_id)
+);
+
+-- =====================================================
+-- TABELA DE EQUIPES
+-- =====================================================
+CREATE TABLE IF NOT EXISTS equipes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    mentor VARCHAR(255),
+    mentor_email VARCHAR(255),
+    edicao_id INT,
+    numero_membros INT DEFAULT 0,
+    meta_financeira DECIMAL(10,2) DEFAULT 0.00,
+    valor_arrecadado DECIMAL(10,2) DEFAULT 0.00,
+
+    -- 🔹 Pontuação total atualizada automaticamente pelas doações
+    pontuacao_total DECIMAL(10,2) DEFAULT 0.00,
+
+    status ENUM('Ativa', 'Inativa', 'Finalizada') DEFAULT 'Ativa',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    -- 🔹 Relacionamento com edições
+    FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL,
+
+    -- 🔹 Índices para performance
+    INDEX idx_equipes_edicao (edicao_id),
+    INDEX idx_equipes_status (status)
+);
+-- =====================================================
+-- TABELA DE ATIVIDADES (ATUALIZADA COM PONTOS)
+-- =====================================================
+CREATE TABLE atividades (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    tipo ENUM('arrecadacao', 'evento', 'campanha', 'workshop', 'palestra', 'visita_social', 'outro') NOT NULL,
+    descricao TEXT,
+    equipe_id INT,
+    edicao_id INT,
+    responsavel VARCHAR(255),
+    data_inicio DATE,
+    data_fim DATE,
+    meta_pontos INT DEFAULT 0,               -- meta em pontos (substitui meta_financeira)
+    pontos_arrecadados INT DEFAULT 0,        -- progresso em pontos (substitui valor_arrecadado)
+    status ENUM('Pendente', 'Em Andamento', 'Concluída', 'Cancelada') DEFAULT 'Pendente',
+    local VARCHAR(255),
+    observacoes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL,
+    FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL,
+    INDEX idx_atividades_equipe (equipe_id),
+    INDEX idx_atividades_tipo (tipo),
+    INDEX idx_atividades_status (status),
+    INDEX idx_atividades_data (data_inicio, data_fim)
+);
+
+-- =====================================================
+-- TABELA DE DOAÇÕES
+-- =====================================================
+CREATE TABLE doacoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    data_doacao DATE NOT NULL,
+    aluno_responsavel VARCHAR(255) NOT NULL,
+    aluno_ra VARCHAR(50),
+    equipe_id INT,
+    atividade_id INT,
+    item_doacao VARCHAR(255) NOT NULL,
+    categoria ENUM('alimento', 'roupa', 'brinquedo', 'material_escolar', 'higiene', 'outro') NOT NULL,
+    quantidade DECIMAL(10,2) NOT NULL,
+    unidade VARCHAR(50) DEFAULT 'unidade',
+    valor_estimado DECIMAL(10,2) DEFAULT 0.00,
+    campanha VARCHAR(255),
+    doador VARCHAR(255),
+    doador_contato VARCHAR(255),
+    pontuacao INT NOT NULL DEFAULT 0,
+    observacoes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL,
+    FOREIGN KEY (atividade_id) REFERENCES atividades(id) ON DELETE SET NULL,
+    INDEX idx_doacoes_data (data_doacao),
+    INDEX idx_doacoes_aluno (aluno_responsavel),
+    INDEX idx_doacoes_equipe (equipe_id),
+    INDEX idx_doacoes_categoria (categoria)
+);
+
+-- =====================================================
+-- TABELA DE METAS
+-- =====================================================
+CREATE TABLE metas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    descricao TEXT,
+    equipe VARCHAR(255) NOT NULL,
+    equipe_id INT,
+    responsavel VARCHAR(255),
+    data_inicio DATE NOT NULL,
+    data_fim DATE NOT NULL,
+    prioridade ENUM('baixa', 'media', 'alta') DEFAULT 'media',
+    status ENUM('pendente', 'em_andamento', 'concluida', 'atrasada', 'cancelada') DEFAULT 'pendente',
+    progresso INT DEFAULT 0,
+    meta_numerica DECIMAL(10,2),
+    valor_atual DECIMAL(10,2) DEFAULT 0.00,
+    unidade VARCHAR(50),
+    observacoes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL,
+    INDEX idx_metas_equipe (equipe_id),
+    INDEX idx_metas_status (status),
+    INDEX idx_metas_prioridade (prioridade),
+    INDEX idx_metas_data (data_inicio, data_fim)
+);
+
+-- =====================================================
+-- TABELA DE RELATÓRIOS
+-- =====================================================
+CREATE TABLE relatorios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    tipo ENUM('geral', 'equipe', 'atividade', 'financeiro', 'participacao') NOT NULL,
+    periodo_inicio DATE,
+    periodo_fim DATE,
+    equipe_id INT,
+    edicao_id INT,
+    gerado_por VARCHAR(255),
+    dados_json JSON,
+    arquivo_path VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL,
+    FOREIGN KEY (edicao_id) REFERENCES edicoes(id) ON DELETE SET NULL,
+    INDEX idx_relatorios_tipo (tipo),
+    INDEX idx_relatorios_periodo (periodo_inicio, periodo_fim)
+);
+
+-- =====================================================
+-- TABELA DE MONITORAMENTO
+-- =====================================================
+CREATE TABLE monitoramento (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    data_registro DATE NOT NULL,
+    equipe_id INT,
+    aluno_responsavel VARCHAR(255),
+    atividade VARCHAR(255),
+    tempo_dedicado INT, -- em minutos
+    descricao_atividade TEXT,
+    resultados TEXT,
+    dificuldades TEXT,
+    proximos_passos TEXT,
+    status_geral ENUM('excelente', 'bom', 'regular', 'ruim') DEFAULT 'bom',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON DELETE SET NULL,
+    INDEX idx_monitoramento_data (data_registro),
+    INDEX idx_monitoramento_equipe (equipe_id)
+);
+
+-- =====================================================
+-- TABELA DE IMAGENS (PARA UPLOAD)
+-- =====================================================
+CREATE TABLE images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    img VARCHAR(500) NOT NULL,
+    titulo VARCHAR(255),
+    descricao TEXT,
+    categoria ENUM('atividade', 'evento', 'doacao', 'equipe', 'geral') DEFAULT 'geral',
+    relacionado_id INT,
+    relacionado_tipo VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =====================================================
+-- INSERÇÃO DE DADOS INICIAIS
+-- =====================================================
+
+-- Usuário administrador padrão
+INSERT INTO usuarios (name, email, password, tipo) VALUES
+('Administrador', 'admin@fecap.br', '$2b$10$rQJ8YQZ9QZ9QZ9QZ9QZ9QOuKl7.vNb.vNb.vNb.vNb.vNb.vNb.vNb', 'administrador');
+
+-- Edição exemplo
+INSERT INTO edicoes (nome, dataInicio, dataFim, descricao, status, meta_financeira) VALUES
+('Lideranças Empáticas 2025.1', '2025-02-01', '2025-06-30', 'Primeira edição de 2025 do projeto Lideranças Empáticas', 'Em Andamento', 50000.00);
+
+-- Equipes exemplo
+INSERT INTO equipes (nome, mentor, mentor_email, edicao_id, meta_financeira) VALUES
+('Equipe Alpha', 'Prof. João Silva', 'joao.silva@fecap.br', 1, 10000.00),
+('Equipe Beta', 'Prof. Maria Santos', 'maria.santos@fecap.br', 1, 10000.00),
+('Equipe Gamma', 'Prof. Carlos Oliveira', 'carlos.oliveira@fecap.br', 1, 10000.00);
+
+-- Participantes exemplo
+INSERT INTO participantes (nome, email, telefone, tipo, curso, semestre, ra, edicao_id, equipe_id) VALUES
+('Ana Silva', 'ana.silva@aluno.fecap.br', '(11) 99999-1111', 'aluno', 'Administração', 4, 'RA001', 1, 1),
+('Bruno Santos', 'bruno.santos@aluno.fecap.br', '(11) 99999-2222', 'aluno', 'Ciências Contábeis', 3, 'RA002', 1, 1),
+('Carla Oliveira', 'carla.oliveira@aluno.fecap.br', '(11) 99999-3333', 'aluno', 'Economia', 5, 'RA003', 1, 2),
+('Diego Costa', 'diego.costa@aluno.fecap.br', '(11) 99999-4444', 'aluno', 'Administração', 2, 'RA004', 1, 2);
+
+-- Atividades exemplo
+INSERT INTO atividades (nome, tipo, descricao, equipe_id, edicao_id, responsavel, data_inicio, data_fim, meta_financeira, status) VALUES
+('Arrecadação de Alimentos', 'arrecadacao', 'Campanha de arrecadação de alimentos não perecíveis', 1, 1, 'Ana Silva', '2025-03-01', '2025-03-15', 5000.00, 'Em Andamento'),
+('Workshop de Liderança', 'workshop', 'Workshop sobre desenvolvimento de lideranças empáticas', 2, 1, 'Carla Oliveira', '2025-03-10', '2025-03-10', 0.00, 'Pendente'),
+('Bazar Beneficente', 'evento', 'Evento de venda de produtos doados', 1, 1, 'Bruno Santos', '2025-03-20', '2025-03-22', 3000.00, 'Pendente');
+
+-- Doações exemplo
+INSERT INTO doacoes (data_doacao, aluno_responsavel, aluno_ra, equipe_id, atividade_id, item_doacao, categoria, quantidade, valor_estimado, pontuacao) VALUES
+('2025-03-01', 'Ana Silva', 'RA001', 1, 1, 'Arroz 5kg', 'alimento', 10, 150.00, 50),
+('2025-03-02', 'Bruno Santos', 'RA002', 1, 1, 'Feijão 1kg', 'alimento', 15, 120.00, 40),
+('2025-03-03', 'Carla Oliveira', 'RA003', 2, NULL, 'Roupas infantis', 'roupa', 20, 200.00, 60);
+
+-- Metas exemplo
+INSERT INTO metas (titulo, descricao, equipe, equipe_id, data_inicio, data_fim, prioridade, status, meta_numerica, unidade) VALUES
+('Arrecadar 1000kg de alimentos', 'Meta de arrecadação de alimentos para o primeiro trimestre', 'Equipe Alpha', 1, '2025-03-01', '2025-03-31', 'alta', 'em_andamento', 1000.00, 'kg'),
+('Realizar 5 workshops', 'Meta de realização de workshops educativos', 'Equipe Beta', 2, '2025-03-01', '2025-05-31', 'media', 'pendente', 5.00, 'eventos'),
+('Arrecadar R$ 10.000', 'Meta financeira para atividades beneficentes', 'Equipe Alpha', 1, '2025-02-01', '2025-06-30', 'alta', 'em_andamento', 10000.00, 'reais');
+
+-- =====================================================
+-- VIEWS ÚTEIS PARA RELATÓRIOS
+-- =====================================================
+
+-- View para resumo de equipes
+CREATE VIEW vw_resumo_equipes AS
+SELECT
+    e.id,
+    e.nome,
+    e.mentor,
+    ed.nome as edicao,
+    COUNT(DISTINCT p.id) as total_participantes,
+    COUNT(DISTINCT a.id) as total_atividades,
+    COALESCE(SUM(d.valor_estimado), 0) as total_arrecadado,
+    e.meta_financeira,
+    CASE
+        WHEN e.meta_financeira > 0 THEN
+            ROUND((COALESCE(SUM(d.valor_estimado), 0) / e.meta_financeira) * 100, 2)
+        ELSE 0
+    END as percentual_meta
+FROM equipes e
+LEFT JOIN edicoes ed ON e.edicao_id = ed.id
+LEFT JOIN participantes p ON e.id = p.equipe_id
+LEFT JOIN atividades a ON e.id = a.equipe_id
+LEFT JOIN doacoes d ON e.id = d.equipe_id
+GROUP BY e.id, e.nome, e.mentor, ed.nome, e.meta_financeira;
+
+-- View para ranking de participantes
+CREATE VIEW vw_ranking_participantes AS
+SELECT
+    p.nome,
+    p.email,
+    p.ra,
+    e.nome as equipe,
+    COUNT(d.id) as total_doacoes,
+    COALESCE(SUM(d.pontuacao), 0) as pontuacao_total,
+    COALESCE(SUM(d.valor_estimado), 0) as valor_total_doado
+FROM participantes p
+LEFT JOIN equipes e ON p.equipe_id = e.id
+LEFT JOIN doacoes d ON p.ra = d.aluno_ra
+GROUP BY p.id, p.nome, p.email, p.ra, e.nome
+ORDER BY pontuacao_total DESC;
+
+-- View para estatísticas de doações por categoria
+CREATE VIEW vw_doacoes_por_categoria AS
+SELECT
+    categoria,
+    COUNT(*) as total_doacoes,
+    SUM(quantidade) as quantidade_total,
+    COALESCE(SUM(valor_estimado), 0) as valor_total,
+    AVG(pontuacao) as pontuacao_media
+FROM doacoes
+GROUP BY categoria
+ORDER BY valor_total DESC;
+
+-- =====================================================
+-- PROCEDURES ÚTEIS
+-- =====================================================
+
+DELIMITER //
+
+-- Procedure para calcular pontuação de equipe
+CREATE PROCEDURE CalcularPontuacaoEquipe(IN equipe_id_param INT)
+BEGIN
+    DECLARE total_pontos INT DEFAULT 0;
+   
+    SELECT COALESCE(SUM(d.pontuacao), 0) INTO total_pontos
+    FROM doacoes d
+    WHERE d.equipe_id = equipe_id_param;
+   
+    UPDATE equipes
+    SET pontuacao_total = total_pontos
+    WHERE id = equipe_id_param;
+END //
+
+-- Procedure para atualizar status de metas baseado na data
+CREATE PROCEDURE AtualizarStatusMetas()
+BEGIN
+    -- Marcar metas como atrasadas
+    UPDATE metas
+    SET status = 'atrasada'
+    WHERE data_fim < CURDATE()
+    AND status IN ('pendente', 'em_andamento');
+   
+    -- Atualizar progresso baseado em valores
+    UPDATE metas
+    SET progresso = CASE
+        WHEN meta_numerica > 0 THEN
+            LEAST(100, ROUND((valor_atual / meta_numerica) * 100))
+        ELSE progresso
+    END
+    WHERE meta_numerica > 0;
+END //
+
+DELIMITER ;
+
+-- =====================================================
+-- TRIGGERS PARA MANTER CONSISTÊNCIA
+-- =====================================================
+
+DELIMITER //
+
+-- Trigger para atualizar contador de participantes na equipe
+CREATE TRIGGER tr_participantes_insert
+AFTER INSERT ON participantes
+FOR EACH ROW
+BEGIN
+    UPDATE equipes
+    SET numero_membros = (
+        SELECT COUNT(*) FROM participantes
+        WHERE equipe_id = NEW.equipe_id AND ativo = TRUE
+    )
+    WHERE id = NEW.equipe_id;
+END //
+
+-- Trigger para atualizar valor arrecadado na equipe
+CREATE TRIGGER tr_doacoes_insert
+AFTER INSERT ON doacoes
+FOR EACH ROW
+BEGIN
+    UPDATE equipes
+    SET valor_arrecadado = (
+        SELECT COALESCE(SUM(valor_estimado), 0)
+        FROM doacoes
+        WHERE equipe_id = NEW.equipe_id
+    )
+    WHERE id = NEW.equipe_id;
+   
+    -- Atualizar também na edição
+    UPDATE edicoes
+    SET valor_arrecadado = (
+        SELECT COALESCE(SUM(e.valor_arrecadado), 0)
+        FROM equipes e
+        WHERE e.edicao_id = (
+            SELECT edicao_id FROM equipes WHERE id = NEW.equipe_id
+        )
+    )
+    WHERE id = (
+        SELECT edicao_id FROM equipes WHERE id = NEW.equipe_id
+    );
+END //
+
+DELIMITER ;
+
+-- =====================================================
+-- ÍNDICES ADICIONAIS PARA PERFORMANCE
+-- =====================================================
+
+CREATE INDEX idx_doacoes_valor ON doacoes(valor_estimado);
+CREATE INDEX idx_atividades_meta ON atividades(meta_financeira);
+CREATE INDEX idx_metas_progresso ON metas(progresso);
+CREATE INDEX idx_usuarios_tipo ON usuarios(tipo);
+
+-- =====================================================
+-- COMENTÁRIOS FINAIS
+-- =====================================================
+
+/*
+Este script SQL cria uma estrutura completa para o sistema Lideranças Empáticas, incluindo:
+
+1. TABELAS PRINCIPAIS:
+   - usuarios: Autenticação e controle de acesso
+   - edicoes: Períodos/semestres do projeto
+   - participantes: Alunos, mentores e professores
+   - equipes: Grupos de trabalho
+   - atividades: Eventos e campanhas
+   - doacoes: Registro de doações e pontuações
+   - metas: Objetivos das equipes
+   - relatorios: Relatórios gerados
+   - monitoramento: Acompanhamento diário
+   - images: Upload de imagens
+
+2. VIEWS: Para facilitar consultas e relatórios
+3. PROCEDURES: Para automatizar cálculos
+4. TRIGGERS: Para manter consistência dos dados
+5. ÍNDICES: Para otimizar performance
+
+Para usar este script:
+1. Execute no MySQL Workbench ou linha de comando
+2. Configure as variáveis de ambiente no backend
+3. Teste as conexões com Postman
+4. Implemente as rotas da API baseadas nesta estrutura
+*/
+
