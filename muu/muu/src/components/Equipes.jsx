@@ -229,6 +229,6 @@ function Equipes({ active, equipes, setEquipes, participantes, edicoes }) {
     </section>
   )
 }
-//agora vai
+
 export default Equipes
 
