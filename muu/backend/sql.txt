@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS equipes (
     mentor VARCHAR(255),
     mentor_email VARCHAR(255),
     edicao_id INT,
-    numero_membros INT DEFAULT 0,
+	membros TEXT,
     meta_financeira DECIMAL(10,2) DEFAULT 0.00,
     valor_arrecadado DECIMAL(10,2) DEFAULT 0.00,
 
@@ -92,6 +92,7 @@ CREATE TABLE IF NOT EXISTS equipes (
     INDEX idx_equipes_edicao (edicao_id),
     INDEX idx_equipes_status (status)
 );
+
 -- =====================================================
 -- TABELA DE ATIVIDADES (ATUALIZADA COM PONTOS)
 -- =====================================================
@@ -460,4 +461,3 @@ Para usar este script:
 3. Teste as conexões com Postman
 4. Implemente as rotas da API baseadas nesta estrutura
 */
-

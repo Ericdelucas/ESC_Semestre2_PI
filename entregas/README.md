@@ -16,7 +16,7 @@
 
 <p align="center">
   <img 
-    src="imagens/bem-vindo.png" 
+    src="imagens/Bemvindo2.png" 
     alt="Lideranças Empáticas" 
     border="0">
   <br>
@@ -179,7 +179,94 @@ Você deve ver uma resposta semelhante a:
 }
 </pre>
 
+## 🎥 Demonstração do Projeto
 
+Assista ao vídeo abaixo para uma demonstração completa das funcionalidades do sistema, incluindo a criação de participantes, equipes e atividades.
+
+[![Clique para assistir à Demonstração](URL_DA_IMAGEM_DE_CAPA_AQUI)](https://drive.google.com/file/d/1QwKzNbsUq7gSUaBbIIqWZVFTIH56E0Mh/view?usp=drivesdk )
+
+
+
+# Rotas da API 🚀
+
+## 🔐 Autenticação e Usuários
+
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `POST` | `/auth/register` | Cria um novo usuário (`name`, `email`, `password`, `tipo` opcional) |
+| `POST` | `/auth/login` | Faz login e retorna o token JWT |
+| `POST` | `/auth/forgot-password` | Gera e loga uma senha temporária no console do servidor (simulação de envio de e-mail) |
+| `PUT` | `/auth/update/:id` | **(Protegida)** Atualiza o nome do usuário logado |
+| `DELETE` | `/auth/delete` | **(Protegida)** Deleta a conta do usuário logado |
+| `GET` | `/auth/me` | **(Protegida)** Retorna os dados do usuário logado |
+
+## 👥 Participantes
+
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/participantes` | Lista todos os participantes |
+| `GET` | `/participantes/:id` | Busca participante por ID |
+| `POST` | `/participantes` | Cria um novo participante |
+| `PUT` | `/participantes/:id` | Atualiza um participante |
+| `DELETE` | `/participantes/:id` | Exclui um participante |
+
+## 🏆 Equipes
+
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/equipes` | Lista todas as equipes |
+| `GET` | `/equipes/:id` | Busca equipe por ID |
+| `GET` | `/equipes/edicao/:edicaoId` | Lista equipes por ID da edição |
+| `POST` | `/equipes` | Cria uma nova equipe |
+| `PUT` | `/equipes/:id` | Atualiza uma equipe |
+| `DELETE` | `/equipes/:id` | Exclui uma equipe |
+
+## 📅 Atividades
+
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/atividades` | Lista todas as atividades |
+| `GET` | `/atividades/:id` | Busca atividade por ID |
+| `GET` | `/atividades/equipe/:equipeId` | Lista atividades por ID da equipe |
+| `POST` | `/atividades` | Cria uma nova atividade |
+| `PUT` | `/atividades/:id` | Atualiza uma atividade |
+| `DELETE` | `/atividades/:id` | Exclui uma atividade |
+
+## 💰 Doações
+
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/doacoes` | Lista todas as doações |
+| `GET` | `/doacoes/:id` | Busca doação por ID |
+| `POST` | `/doacoes` | Cria uma nova doação |
+| `PUT` | `/doacoes/:id` | Atualiza uma doação |
+| `DELETE` | `/doacoes/:id` | Exclui uma doação |
+
+## 🖼️ Imagens
+
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `POST` | `/images` | Insere uma imagem (requer `form-data` com chave `image`) |
+
+## 🎯 Metas
+
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/metas` | Lista todas as metas |
+| `GET` | `/metas/:id` | Busca meta por ID |
+| `POST` | `/metas` | Cria uma nova meta |
+| `PUT` | `/metas/:id` | Atualiza uma meta |
+| `DELETE` | `/metas/:id` | Exclui uma meta |
+
+## 📚 Edições
+
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/edicoes` | Lista todas as edições |
+| `GET` | `/edicoes/:id` | Busca edição por ID |
+| `POST` | `/edicoes` | Cria uma nova edição |
+| `PUT` | `/edicoes/:id` | Atualiza uma edição |
+| `DELETE` | `/edicoes/:id` | Exclui uma edição |
 
 
 
